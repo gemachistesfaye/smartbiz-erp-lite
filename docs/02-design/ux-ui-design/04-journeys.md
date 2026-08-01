@@ -1,330 +1,174 @@
 # User Journeys
 ## SmartBiz ERP Lite
 
-**Version:** 1.0
-**Date:** August 2026
-
 ---
 
-## 1. Business Owner Journey
+## 1. Owner Journeys
 
-### Journey 1: First-Time Setup
-```
-Owner downloads/opens PWA
-    │
-    ├─► Sees welcome screen
-    │
-    ├─► Taps "Register"
-    │
-    ├─► Fills: Business name, Email, Password, Name
-    │
-    ├─► Account created → Redirect to Dashboard
-    │
-    ├─► Dashboard shows empty state with onboarding cards
-    │
-    ├─► Taps "Add your first category"
-    │
-    ├─► Creates category "Grocery"
-    │
-    ├─► Taps "Add your first product"
-    │
-    ├─► Creates product with pricing
-    │
-    ├─► Taps "Add a cashier"
-    │
-    ├─► Creates cashier account
-    │
-    ├─► Shares credentials with cashier
-    │
-    └─► Setup complete → Dashboard shows data
+### 1.1 First-Time Setup
+
+```mermaid
+graph TD
+    A[Open PWA] --> B[Register]
+    B --> C[Fill: Business name, Email, Password, Name]
+    C --> D[Account Created → Dashboard]
+    D --> E[Empty State + Onboarding Cards]
+    E --> F[Add Category]
+    E --> G[Add Product with Pricing]
+    E --> H[Add Cashier Account]
+    F --> I[Setup Complete]
+    G --> I
+    H --> I
 ```
 
-### Journey 2: Daily Monitoring
-```
-Owner opens app (morning)
-    │
-    ├─► Logs in → Dashboard
-    │
-    ├─► Reviews summary cards:
-    │   ├── Today's sales: 25,000 ETB ↑12%
-    │   ├── Products: 120
-    │   ├── Customers with credit: 8
-    │   └── Low stock alerts: 5
-    │
-    ├─► Checks sales trend chart
-    │
-    ├─► Reviews top selling products
-    │
-    ├─► Taps "Low Stock" card
-    │
-    ├─► Sees 5 items below threshold
-    │
-    ├─► Notes items to reorder
-    │
-    ├─► Taps "Customer Credit" card
-    │
-    ├─► Reviews outstanding debts
-    │
-    ├─► Sees Sara Mohammed owes 7,500 ETB (11 days overdue)
-    │
-    ├─► Taps customer → Views details
-    │
-    ├─► Sends WhatsApp message to Sara (outside app)
-    │
-    └─► Returns to dashboard → Satisfied with visibility
+### 1.2 Daily Monitoring
+
+```mermaid
+graph TD
+    A[Login → Dashboard] --> B[Review Summary Cards]
+    B --> C[Today's Sales: 25,000 ETB ↑12%]
+    B --> D[Products: 120]
+    B --> E[Customers w/ Credit: 8]
+    B --> F[Low Stock Alerts: 5]
+    A --> G[Sales Trend Chart]
+    A --> H[Top Selling Products]
+    A --> I[Tap Low Stock Card]
+    I --> J[5 items below threshold]
+    A --> K[Tap Customer Credit Card]
+    K --> L[Sara owes 7,500 ETB - 11 days overdue]
+    L --> M[View Details → WhatsApp outside app]
 ```
 
-### Journey 3: Product Management
-```
-Owner wants to add new product
-    │
-    ├─► Navigates to Products page
-    │
-    ├─► Taps "+ Add Product"
-    │
-    ├─► Fills form:
-    │   ├── Name: "Organic Honey"
-    │   ├── Category: "Beverage"
-    │   ├── Base Cost: 150 ETB
-    │   ├── Overhead: 20 ETB
-    │   ├── Selling Price: 250 ETB
-    │   └── Min Threshold: 5
-    │
-    ├─► System shows:
-    │   ├── Landed Cost: 170 ETB (auto-calculated)
-    │   └── Profit Margin: 47% (auto-calculated)
-    │
-    ├─► Taps "Save Product"
-    │
-    ├─► Success toast: "Product saved successfully"
-    │
-    ├─► Redirect to products list
-    │
-    └─► New product appears in table
+### 1.3 Product Management
+
+```mermaid
+graph TD
+    A[Products Page] --> B["+ Add Product"]
+    B --> C[Fill Form]
+    C --> D[Name: Organic Honey]
+    C --> E[Category: Beverage]
+    C --> F[Base Cost: 150, Overhead: 20 ETB]
+    C --> G[Selling Price: 250 ETB]
+    C --> H[Min Threshold: 5]
+    D --> I[System Auto-Calculates]
+    F --> I
+    I --> J[Landed Cost: 170 ETB]
+    I --> K[Profit Margin: 47%]
+    G --> I
+    J --> L[Save Product]
+    K --> L
+    L --> M[Toast: Saved ✓ → Products List]
 ```
 
-### Journey 4: Credit Management
-```
-Customer comes to pay debt
-    │
-    ├─► Owner navigates to Customers
-    │
-    ├─► Searches "Abdi Ahmed"
-    │
-    ├─► Taps customer → Customer Details
-    │
-    ├─► Sees: Credit Balance 5,000 ETB
-    │
-    ├─► Taps "Record Payment"
-    │
-    ├─► Enters: 2,000 ETB
-    │
-    ├─► System validates: 2,000 ≤ 5,000 ✓
-    │
-    ├─► Taps "Confirm"
-    │
-    ├─► Success toast: "Payment recorded"
-    │
-    ├─► Balance updates: 3,000 ETB
-    │
-    ├─► Transaction history shows new entry
-    │
-    └─► Owner gives receipt to customer
+### 1.4 Credit Payment
+
+```mermaid
+sequenceDiagram
+    participant O as Owner
+    participant API as Backend
+    participant C as Customer
+
+    O->>API: Search "Abdi Ahmed"
+    API-->>O: Customer details (Balance: 5,000 ETB)
+    O->>O: Tap "Record Payment"
+    O->>API: Enter 2,000 ETB
+    API->>API: Validate 2,000 ≤ 5,000 ✓
+    API-->>O: Payment recorded
+    Note over O: Balance: 3,000 ETB
+    O->>C: Give receipt
 ```
 
 ---
 
-## 2. Manager Journey
+## 2. Manager Journeys
 
-### Journey 1: Morning Opening
-```
-Manager logs in → Dashboard
-    │
-    ├─► Reviews dashboard
-    │
-    ├─► Checks low-stock alerts
-    │
-    ├─► Navigates to Inventory
-    │
-    ├─► Sees Bread at 5 units (below threshold)
-    │
-    ├─► Calls supplier to reorder
-    │
-    ├─► Adjusts stock after delivery:
-    │   ├── Product: Bread
-    │   ├── Adjustment: +50
-    │   ├── Reason: "Restocked from Merkato supplier"
-    │   └── Confirms
-    │
-    ├─► Stock updates: 55 units
-    │
-    └─► Ready for day's operations
+### 2.1 Morning Opening + Restock
+
+```mermaid
+graph TD
+    A[Login → Dashboard] --> B[Check Low-Stock Alerts]
+    B --> C[Bread: 5 units below threshold]
+    C --> D[Call Supplier]
+    D --> E[Receive Delivery]
+    E --> F[Inventory Adjustment: +50 units]
+    F --> G[Reason: Restocked from Merkato supplier]
+    G --> H[Stock: 55 units ✓]
 ```
 
-### Journey 2: Processing Credit Sale
-```
-Regular customer wants to buy on credit
-    │
-    ├─► Manager opens POS
-    │
-    ├─► Searches products, adds to cart
-    │
-    ├─► Cart total: 500 ETB
-    │
-    ├─► Selects "Credit" payment method
-    │
-    ├─► System prompts: Select Customer
-    │
-    ├─► Searches "Tesfaye D."
-    │
-    ├─► System shows: Current balance 2,500 ETB
-    │
-    ├─► Manager confirms credit sale
-    │
-    ├─► Checkout processes:
-    │   ├── Sale recorded
-    │   ├── Inventory decremented
-    │   └── Customer balance: 2,500 + 500 = 3,000 ETB
-    │
-    ├─► Success: "Sale Complete"
-    │
-    └─► Hands items to customer
+### 2.2 Credit Sale
+
+```mermaid
+graph TD
+    A[Open POS] --> B[Search + Add Items to Cart]
+    B --> C[Cart Total: 500 ETB]
+    C --> D[Select "Credit" Payment]
+    D --> E[Search Customer: Tesfaye D.]
+    E --> F[Current Balance: 2,500 ETB]
+    F --> G[Confirm Sale]
+    G --> H[POST /api/sales/checkout]
+    H --> I[Sale Recorded + Inventory Decremented]
+    I --> J[Customer Balance: 3,000 ETB]
 ```
 
-### Journey 3: End-of-Day Reconciliation
-```
-Manager reviews day's performance
-    │
-    ├─► Dashboard shows today's summary
-    │
-    ├─► Navigates to Sales History
-    │
-    ├─► Filters: Today, All cashiers
-    │
-    ├─► Reviews:
-    │   ├── Total sales: 25,000 ETB
-    │   ├── Cash: 15,000 ETB
-    │   ├── Mobile Money: 5,000 ETB
-    │   └── Credit: 5,000 ETB
-    │
-    ├─► Exports CSV for records
-    │
-    └─► Closes shop
+### 2.3 End-of-Day
+
+```mermaid
+graph TD
+    A[Dashboard] --> B[Sales History - Filter: Today]
+    B --> C[Total: 25,000 ETB]
+    C --> D[Cash: 15,000]
+    C --> E[Mobile: 5,000]
+    C --> F[Credit: 5,000]
+    B --> G[Export CSV]
 ```
 
 ---
 
-## 3. Cashier Journey
+## 3. Cashier Journeys
 
-### Journey 1: Quick Cash Sale
-```
-Customer: "Give me 2 milk and 1 bread"
-    │
-    ├─► Cashier opens POS (default screen)
-    │
-    ├─► Searches "milk"
-    │
-    ├─► Taps product → Added to cart
-    │
-    ├─► Adjusts quantity to 2
-    │
-    ├─► Searches "bread"
-    │
-    ├─► Taps product → Added to cart
-    │
-    ├─► Reviews cart:
-    │   ├── Milk 1L x2 = 90 ETB
-    │   ├── Bread x1 = 25 ETB
-    │   └── Total = 115 ETB
-    │
-    ├─► Selects "Cash"
-    │
-    ├─► Customer gives 150 ETB
-    │
-    ├─► Enters 150 → Change: 35 ETB
-    │
-    ├─► Taps "Complete Sale"
-    │
-    ├─► Green checkmark: "Sale Complete!"
-    │
-    ├─► Cart clears
-    │
-    └─► Ready for next customer
+### 3.1 Quick Cash Sale
+
+```mermaid
+graph TD
+    A[POS - Default Screen] --> B[Search "milk" → Add x2]
+    B --> C[Search "bread" → Add x1]
+    C --> D[Cart: Milk 90 + Bread 25 = 115 ETB]
+    D --> E[Select Cash]
+    E --> F[Customer gives 150 ETB]
+    F --> G[Change: 35 ETB]
+    G --> H[Complete Sale ✓]
 ```
 
-### Journey 2: Processing Offline Sale
-```
-Internet goes down during rush hour
-    │
-    ├─► App detects offline status
-    │
-    ├─► Banner: "You are offline. Sales will sync when connected."
-    │
-    ├─► POS continues working:
-    │   ├── Products from IndexedDB cache
-    │   ├── Search works locally
-    │   └── Cart functions normally
-    │
-    ├─► Sale completed → Saved locally
-    │
-    ├─► Multiple sales processed offline
-    │
-    ├─► Internet reconnects
-    │
-    ├─► Status: "Syncing 3 offline sales..."
-    │
-    ├─► Each sale sent to server
-    │
-    ├─► Server assigns IDs
-    │
-    ├─► IndexedDB updated
-    │
-    └─► Status: "All sales synced ✓"
+### 3.2 Offline Sale
+
+```mermaid
+sequenceDiagram
+    participant C as Cashier
+    participant App as IndexedDB
+    participant S as Server
+
+    Note over C,App: Internet down
+    C->>App: Process sale (products from cache)
+    App->>App: Save to pending queue
+    Note over App: Banner: "Offline - syncs later"
+
+    Note over App,S: Internet back
+    App->>S: Sync batch of offline sales
+    S-->>App: Server IDs assigned
+    App->>App: Update local data
 ```
 
-### Journey 3: Customer Credit Sale
-```
-Customer: "Put it on my tab"
-    │
-    ├─► Cashier processes items normally
-    │
-    ├─► At payment: Selects "Credit"
-    │
-    ├─► System: "Select a customer"
-    │
-    ├─► Cashier searches customer name
-    │
-    ├─► Selects customer
-    │
-    ├─► System shows: Current balance 1,000 ETB
-    │
-    ├─► Cashier confirms
-    │
-    ├─► Sale completes
-    │
-    ├─► Customer balance: 1,000 + sale amount
-    │
-    └─► Cashier hands items to customer
-```
+### 3.3 Credit Sale + New Customer
 
-### Journey 4: Registering New Customer During Sale
-```
-New customer: "I don't have an account"
-    │
-    ├─► At credit payment step
-    │
-    ├─► Cashier taps "New Customer"
-    │
-    ├─► Modal opens:
-    │   ├── First name: "Mohammed"
-    │   ├── Phone: "+251911111111"
-    │   └── Last name: (optional)
-    │
-    ├─► Taps "Create"
-    │
-    ├─► Customer created
-    │
-    ├─► New customer auto-selected
-    │
-    └─► Credit sale proceeds
+```mermaid
+graph TD
+    A[Process Items in Cart] --> B[Select "Credit"]
+    B --> C{Customer exists?}
+    C -->|Yes| D[Search + Select Customer]
+    C -->|No| E[Tap "New Customer"]
+    E --> F[Modal: Name, Phone]
+    F --> G[Create Customer]
+    G --> D
+    D --> H[Confirm Sale]
+    H --> I[Balance updated]
 ```
