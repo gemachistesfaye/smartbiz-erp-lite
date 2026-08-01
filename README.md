@@ -53,7 +53,7 @@ All project documentation is in the `docs/` folder:
 | [api-documentation.md](docs/api-documentation.md) | REST API reference |
 | [deployment.md](docs/deployment.md) | Deployment and DevOps |
 | [development-roadmap.md](docs/development-roadmap.md) | Implementation timeline |
-| [ux-ui-design.md](docs/ux-ui-design.md) | UX/UI Design System & Product Design |
+| [ux-ui-design/](docs/ux-ui-design/) | UX/UI Design System & Product Design (5 docs) |
 | [roadmap.md](docs/roadmap.md) | Documentation plan |
 
 ---
