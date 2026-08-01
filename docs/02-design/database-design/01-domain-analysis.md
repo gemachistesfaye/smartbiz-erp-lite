@@ -1,4 +1,4 @@
-# 01 - Domain Analysis
+# Domain Analysis
 ## SmartBiz ERP Lite Database
 
 ---
@@ -26,48 +26,40 @@
 
 ## Entity Relationships
 
-```
-Business
-  |-- owns --> Users (many)
-  |-- owns --> Products (many)
-  |-- owns --> Categories (many)
-  |-- owns --> Units (many)
-  |-- owns --> Suppliers (many)
-  |-- owns --> Customers (many)
-  |-- owns --> Purchases (many)
-  |-- owns --> Sales (many)
-  |-- owns --> Expenses (many)
+```mermaid
+graph TD
+    BIZ[Business] --> USER[User]
+    BIZ --> PROD[Product]
+    BIZ --> CAT[Category]
+    BIZ --> UNIT[Unit]
+    BIZ --> SUP[Supplier]
+    BIZ --> CUST[Customer]
+    BIZ --> SALE[Sale]
+    BIZ --> PUR[Purchase]
+    BIZ --> EXP[Expense]
 
-Product
-  |-- belongs_to --> Category (one)
-  |-- has_one --> Inventory (one)
-  |-- appears_in --> SaleItem (many)
-  |-- appears_in --> PurchaseItem (many)
+    CAT --> PROD
+    UNIT --> PROD
+    PROD --> INV[Inventory]
+    PROD --> SI[SaleItem]
+    PROD --> PI[PurchaseItem]
 
-Sale
-  |-- belongs_to --> User/Cashier (one)
-  |-- belongs_to --> Customer (one, optional)
-  |-- has_many --> SaleItem (many)
-  |-- has_many --> Payment (many)
+    USER --> SALE
+    CUST --> SALE
+    SALE --> SI
+    SALE --> PAY[Payment]
 
-Customer
-  |-- has_many --> Sales (many)
-  |-- has_many --> Payment (many)
+    SUP --> PUR
+    PUR --> PI
 
-Purchase
-  |-- belongs_to --> Supplier (one)
-  |-- has_many --> PurchaseItem (many)
+    EXP --> EXPCAT[ExpenseCategory]
 ```
 
----
-
-## Data Flow
-
+**Data flow:**
 ```
-Purchase (IN) --> Inventory (Stock) --> Sale (OUT) --> Payment (Money)
-     |                  |                  |                |
-     v                  v                  v                v
- Cost Data        Stock Level        Revenue Data     Cash Flow
+Purchase (IN) → Inventory (Stock) → Sale (OUT) → Payment (Money)
+     ↓                ↓                ↓              ↓
+ Cost Data      Stock Level      Revenue Data    Cash Flow
 ```
 
 ---
@@ -76,62 +68,46 @@ Purchase (IN) --> Inventory (Stock) --> Sale (OUT) --> Payment (Money)
 
 | Aspect | Decision | Rationale |
 |:-------|:---------|:----------|
-| Isolation method | `businessId` column on every table | Simplest to implement; sufficient for SME scale |
-| Enforcement | ORM middleware (Prisma) + API guards | Application-level enforcement; fast |
-| Future migration | Can move to schema-per-tenant if needed | Flexible upgrade path |
-| Data separation | Every query filtered by tenantId | Impossible to leak data across tenants |
+| Isolation | `businessId` column on every table | Simplest; sufficient for SME scale |
+| Enforcement | ORM middleware (Prisma) + API guards | Application-level; fast |
+| Migration | Can move to schema-per-tenant if needed | Flexible upgrade path |
+| Data separation | Every query filtered by tenantId | Impossible to leak across tenants |
 
 ---
 
-## One-to-One Relationships
+## Relationship Summary
 
-| Parent | Child | Foreign Key | Cascade |
-|:-------|:------|:------------|:--------|
-| Product | Inventory | `inventory.productId` | Cascade delete |
-| Business | BusinessSettings | `businessSettings.businessId` | Cascade delete |
+### One-to-One
+| Parent | Child | FK | Cascade |
+|:-------|:------|:---|:--------|
+| Product | Inventory | `productId` | Cascade |
+| Business | BusinessSettings | `businessId` | Cascade |
 
----
+### One-to-Many
+| Parent | Child | FK | Cascade |
+|:-------|:------|:---|:--------|
+| Business | User, Product, Category, Customer, Sale, Purchase, Expense | `businessId` | Cascade |
+| Category | Product | `categoryId` | Restrict |
+| User | Sale | `cashierId` | Restrict |
+| Customer | Sale | `customerId` | Restrict |
+| Sale | SaleItem, Payment | `saleId` | Cascade |
+| Supplier | Purchase | `supplierId` | Restrict |
+| Purchase | PurchaseItem | `purchaseId` | Cascade |
+| Product | SaleItem, PurchaseItem | `productId` | Restrict |
 
-## One-to-Many Relationships
+### Many-to-Many (through join tables)
+| A | B | Through |
+|:--|:--|:--------|
+| Sale | Product | SaleItem |
+| Purchase | Product | PurchaseItem |
 
-| Parent | Child | Foreign Key | Cascade |
-|:-------|:------|:------------|:--------|
-| Business | User | `user.businessId` | Cascade delete |
-| Business | Product | `product.businessId` | Cascade delete |
-| Business | Category | `category.businessId` | Cascade delete |
-| Business | Customer | `customer.businessId` | Cascade delete |
-| Business | Sale | `sale.businessId` | Cascade delete |
-| Business | Purchase | `purchase.businessId` | Cascade delete |
-| Business | Expense | `expense.businessId` | Cascade delete |
-| Category | Product | `product.categoryId` | Restrict |
-| User | Sale | `sale.cashierId` | Restrict |
-| Customer | Sale | `sale.customerId` | Restrict |
-| Sale | SaleItem | `saleItem.saleId` | Cascade delete |
-| Sale | Payment | `payment.saleId` | Cascade delete |
-| Supplier | Purchase | `purchase.supplierId` | Restrict |
-| Purchase | PurchaseItem | `purchaseItem.purchaseId` | Cascade delete |
-| Product | SaleItem | `saleItem.productId` | Restrict |
-| Product | PurchaseItem | `purchaseItem.productId` | Restrict |
-
----
-
-## Many-to-Many Relationships
-
-| Entity A | Entity B | Through Table | Notes |
-|:---------|:---------|:--------------|:------|
-| Sale | Product | SaleItem | A sale has many products; a product appears in many sales |
-| Purchase | Product | PurchaseItem | A purchase has many products; a product appears in many purchases |
-
----
-
-## Relationship Rules
-
-| Rule | Implementation | Why |
-|:-----|:---------------|:----|
-| Cascade Delete | Child deleted when parent deleted | Tenant deletion removes all data |
-| Restrict Delete | Cannot delete parent if children exist | Prevents orphaned records |
-| Optional Relation | Foreign key nullable | Customer on Sale is optional (walk-in) |
-| Required Relation | Foreign key not null | Sale must have a cashier |
+### Relationship Rules
+| Rule | Why |
+|:-----|:----|
+| **Cascade Delete** | Tenant deletion removes all data |
+| **Restrict Delete** | Prevents orphaned records (can't delete parent if children exist) |
+| **Optional FK** | Customer on Sale nullable (walk-in customers) |
+| **Required FK** | Sale must have a cashier |
 
 ---
 
@@ -139,38 +115,18 @@ Purchase (IN) --> Inventory (Stock) --> Sale (OUT) --> Payment (Money)
 
 | Category | Type | Usage | Why |
 |:---------|:-----|:------|:----|
-| IDs | UUID | Primary keys, foreign keys | Globally unique; safe for distributed systems |
-| Text | VARCHAR(n) | Names, emails, phone numbers | Bounded length; index-friendly |
-| Text | TEXT | Descriptions, notes, addresses | Unbounded; no performance difference in PostgreSQL |
-| Numbers | NUMERIC(12,2) | Money, prices, costs | Exact precision; no floating-point errors |
-| Numbers | INTEGER | Quantities, counts | Sufficient range; fast operations |
-| Boolean | BOOLEAN | Flags (isActive, isRead) | Native PostgreSQL boolean |
-| Time | TIMESTAMPTZ | All timestamps | Timezone-aware; handles Ethiopian time correctly |
-| Time | DATE | Expense date | Date-only when time is irrelevant |
-| JSON | JSONB | Audit log old/new values | Flexible schema; queryable; compressed |
+| IDs | UUID | PKs, FKs | Globally unique; works offline; secure |
+| Text | VARCHAR(n) | Names, emails | Bounded; index-friendly |
+| Text | TEXT | Descriptions, notes | Unbounded |
+| Numbers | NUMERIC(12,2) | Money, prices | Exact precision; no float errors |
+| Numbers | INTEGER | Quantities | Sufficient range; fast |
+| Boolean | BOOLEAN | Flags | Native PostgreSQL |
+| Time | TIMESTAMPTZ | Timestamps | Timezone-aware |
+| Time | DATE | Expense date | Date-only when time irrelevant |
+| JSON | JSONB | Audit log values | Flexible; queryable; compressed |
 
----
+### UUID vs SERIAL
+UUID chosen: globally unique, secure (not guessable), works offline, no coordination needed.
 
-## Why UUID Over SERIAL
-
-| Factor | UUID | SERIAL |
-|:-------|:-----|:-------|
-| Uniqueness | Globally unique across all tenants | Sequential within one table |
-| Security | Cannot guess next ID | Sequential IDs are predictable |
-| Distributed | Works without coordination | Requires database coordination |
-| Offline | Can generate client-side | Requires database connection |
-| Storage | 16 bytes | 4-8 bytes |
-
-**Decision:** UUID is the right choice for a multi-tenant SaaS with offline support.
-
----
-
-## Why NUMERIC Over FLOAT
-
-| Factor | NUMERIC | FLOAT |
-|:-------|:--------|:------|
-| Precision | Exact (12 digits, 2 decimal) | Approximate (floating point) |
-| Money | Correct for financial calculations | Can lose pennies on rounding |
-| Example | 0.1 + 0.2 = 0.30 | 0.1 + 0.2 = 0.30000000000000004 |
-
-**Decision:** NUMERIC is mandatory for any money-related column.
+### NUMERIC vs FLOAT
+NUMERIC mandatory for money: exact precision (`0.1 + 0.2 = 0.30`), no floating-point rounding errors.
