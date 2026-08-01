@@ -2,7 +2,7 @@
 
 A production-ready SaaS-style ERP Progressive Web Application designed for Small and Medium Businesses (SMEs) in Ethiopia.
 
-> **Phase:** Planning & Architecture (Phase 1 Complete)
+> **Phase:** Design Documentation (Phase 2 Complete)
 > **Status:** Ready for Implementation
 
 ---
@@ -37,23 +37,32 @@ Every Ethiopian shop owner should have the operational intelligence of a corpora
 
 ## Documentation
 
-All project documentation is in the `docs/` folder:
+All project documentation is in the `docs/` folder, organized by phase:
 
+### Phase 1 — Planning (`docs/01-planning/`)
 | Document | Description |
 |:---------|:------------|
-| [PRD.md](docs/PRD.md) | Product Requirements Document |
-| [user-stories.md](docs/user-stories.md) | User stories with acceptance criteria |
-| [mvp-scope.md](docs/mvp-scope.md) | MVP feature prioritization |
-| [architecture.md](docs/architecture.md) | System architecture and design |
-| [module-breakdown.md](docs/module-breakdown.md) | Module definitions and dependencies |
-| [rbac-matrix.md](docs/rbac-matrix.md) | Role-based access control |
-| [application-flow.md](docs/application-flow.md) | User journey flows |
-| [engineering-standards.md](docs/engineering-standards.md) | Code standards and workflow |
-| [database-design.md](docs/database-design.md) | Prisma schema and ERD |
-| [api-documentation.md](docs/api-documentation.md) | REST API reference |
-| [deployment.md](docs/deployment.md) | Deployment and DevOps |
-| [development-roadmap.md](docs/development-roadmap.md) | Implementation timeline |
-| [ux-ui-design/](docs/ux-ui-design/) | UX/UI Design System & Product Design (5 docs) |
+| [PRD.md](docs/01-planning/PRD.md) | Product Requirements Document |
+| [user-stories.md](docs/01-planning/user-stories.md) | User stories with acceptance criteria |
+| [mvp-scope.md](docs/01-planning/mvp-scope.md) | MVP feature prioritization |
+| [module-breakdown.md](docs/01-planning/module-breakdown.md) | Module definitions and dependencies |
+| [rbac-matrix.md](docs/01-planning/rbac-matrix.md) | Role-based access control |
+| [application-flow.md](docs/01-planning/application-flow.md) | User journey flows |
+| [engineering-standards.md](docs/01-planning/engineering-standards.md) | Code standards and workflow |
+| [api-documentation.md](docs/01-planning/api-documentation.md) | REST API reference |
+| [deployment.md](docs/01-planning/deployment.md) | Deployment and DevOps |
+| [development-roadmap.md](docs/01-planning/development-roadmap.md) | Implementation timeline |
+
+### Phase 2 — Design (`docs/02-design/`)
+| Document | Description |
+|:---------|:------------|
+| [architecture.md](docs/02-design/architecture.md) | System architecture and design |
+| [ux-ui-design/](docs/02-design/ux-ui-design/) | UX/UI Design System & Product Design (5 docs) |
+| [database-design/](docs/02-design/database-design/) | Domain analysis, table design, Prisma schema, ER diagrams, performance |
+
+### Other
+| Document | Description |
+|:---------|:------------|
 | [roadmap.md](docs/roadmap.md) | Documentation plan |
 
 ---
@@ -71,9 +80,10 @@ All project documentation is in the `docs/` folder:
 ## Development Status
 
 - [x] Phase 1: Planning & Architecture
-- [ ] Phase 2: MVP Implementation (2-week sprint)
-- [ ] Phase 3: Feature Enhancement
-- [ ] Phase 4: SaaS Preparation
+- [x] Phase 2: Design Documentation
+- [ ] Phase 3: MVP Implementation (2-week sprint)
+- [ ] Phase 4: Feature Enhancement
+- [ ] Phase 5: SaaS Preparation
 
 ---
 
