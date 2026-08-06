@@ -6,6 +6,7 @@ import { AppModule } from '../src/app.module';
 describe('Users (e2e)', () => {
   let app: INestApplication;
   let ownerToken: string;
+  let cashierToken: string;
   let userId: string;
 
   beforeAll(async () => {
@@ -85,6 +86,51 @@ describe('Users (e2e)', () => {
           role: 'CASHIER',
         })
         .expect(401);
+    });
+  });
+
+  describe('Role-Based Access Control', () => {
+    beforeAll(async () => {
+      const loginRes = await request(app.getHttpServer()).post('/api/auth/login').send({
+        email: 'cashier@example.com',
+        password: 'password123',
+      });
+      cashierToken = loginRes.body.data.accessToken;
+    });
+
+    it('CASHIER should NOT access GET /users (OWNER/MANAGER only)', () => {
+      return request(app.getHttpServer())
+        .get('/api/users')
+        .set('Authorization', `Bearer ${cashierToken}`)
+        .expect(403);
+    });
+
+    it('CASHIER should NOT access POST /users (OWNER only)', () => {
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .set('Authorization', `Bearer ${cashierToken}`)
+        .send({
+          email: 'another@example.com',
+          password: 'password123',
+          firstName: 'Another',
+          lastName: 'User',
+          role: 'CASHIER',
+        })
+        .expect(403);
+    });
+
+    it('CASHIER should NOT access PUT /users/:id/deactivate (OWNER only)', () => {
+      return request(app.getHttpServer())
+        .put(`/api/users/${userId}/deactivate`)
+        .set('Authorization', `Bearer ${cashierToken}`)
+        .expect(403);
+    });
+
+    it('CASHIER should NOT access DELETE /users/:id (OWNER only)', () => {
+      return request(app.getHttpServer())
+        .delete(`/api/users/${userId}`)
+        .set('Authorization', `Bearer ${cashierToken}`)
+        .expect(403);
     });
   });
 

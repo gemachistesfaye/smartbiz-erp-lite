@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import toast from 'react-hot-toast';
 import apiClient from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/lib/constants';
 import { useAuthStore } from '../store/auth-store';
@@ -35,16 +34,9 @@ export function useLogin() {
       const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, data);
       return response.data.data as AuthResponse;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
-      toast.success('Welcome back!');
-      navigate({ to: '/dashboard' });
-    },
-    onError: (error: Error) => {
-      const message =
-        (error as unknown as { response?: { data?: { error?: { message?: string } } } }).response
-          ?.data?.error?.message || 'Login failed';
-      toast.error(message);
+      await navigate({ to: '/dashboard', replace: true });
     },
   });
 }
@@ -58,16 +50,9 @@ export function useRegister() {
       const response = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, data);
       return response.data.data as AuthResponse;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
-      toast.success('Business created successfully!');
-      navigate({ to: '/dashboard' });
-    },
-    onError: (error: Error) => {
-      const message =
-        (error as unknown as { response?: { data?: { error?: { message?: string } } } }).response
-          ?.data?.error?.message || 'Registration failed';
-      toast.error(message);
+      await navigate({ to: '/dashboard', replace: true });
     },
   });
 }
@@ -83,9 +68,9 @@ export function useLogout() {
         await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       logout();
-      navigate({ to: '/login' });
+      await navigate({ to: '/login', replace: true });
     },
   });
 }

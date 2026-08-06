@@ -192,6 +192,120 @@ THROTTLE_LIMIT=100
 Once the backend is running, access the Swagger documentation at:
 http://localhost:3001/docs
 
+## Authentication
+
+### Flow
+
+```
+Register → Create Business + Owner → Login → JWT Access Token + Refresh Token
+                                                              ↓
+Dashboard ← Navigate ← setAuth(store) ← API Response
+                                                              ↓
+                                    Token expires → /auth/refresh → New tokens
+                                                              ↓
+                                    Logout → Delete refresh token → Clear store → /login
+```
+
+1. **Register** — Creates a Business record and an Owner user. Returns JWT pair.
+2. **Login** — Validates credentials, returns JWT access token (24h) + refresh token (7d).
+3. **Access** — Frontend stores tokens in localStorage. API client attaches `Authorization: Bearer <token>` to every request.
+4. **Refresh** — When access token expires (401), the API client automatically calls `/auth/refresh` with the refresh token to get new tokens.
+5. **Logout** — Deletes refresh token from database, clears localStorage, redirects to `/login`.
+
+### JWT Tokens
+
+| Token | Lifetime | Secret | Purpose |
+|-------|----------|--------|---------|
+| Access Token | 24 hours | `JWT_SECRET` | Authenticate API requests |
+| Refresh Token | 7 days | `JWT_REFRESH_SECRET` | Get new access tokens |
+
+### Security Features
+
+- bcrypt password hashing (12 salt rounds)
+- Passwords never returned in API responses
+- Helmet security headers
+- Rate limiting (100 requests/60s)
+- CORS configured per environment
+- Input validation via DTOs (whitelist + forbidNonWhitelisted)
+- Soft delete for users (deletedAt)
+
+## User Roles & Permissions
+
+| Action | OWNER | MANAGER | CASHIER |
+|--------|:-----:|:-------:|:-------:|
+| **User Management** | | | |
+| Create staff | ✅ | ❌ | ❌ |
+| View users | ✅ | ✅ | ❌ |
+| Update users | ✅ | ✅ | ❌ |
+| Deactivate users | ✅ | ❌ | ❌ |
+| Activate users | ✅ | ❌ | ❌ |
+| Delete users | ✅ | ❌ | ❌ |
+| Change own password | ✅ | ✅ | ✅ |
+| **Business** | | | |
+| Full access | ✅ | ❌ | ❌ |
+| **Products/Inventory** (Phase 2) | | | |
+| Manage products | ✅ | ✅ | ❌ |
+| View products | ✅ | ✅ | ✅ |
+| **Sales** (Phase 2) | | | |
+| Process sales | ✅ | ✅ | ✅ |
+| View reports | ✅ | ✅ | ❌ |
+
+**Note:** Owner account cannot be deactivated, deleted, or have its role changed.
+
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/register` | No | Register new business + owner |
+| POST | `/api/auth/login` | No | Login with email/password |
+| POST | `/api/auth/refresh` | No | Refresh access token |
+| POST | `/api/auth/logout` | Yes | Logout (remove refresh token) |
+| POST | `/api/auth/logout-all` | Yes | Logout from all devices |
+| GET | `/api/auth/me` | Yes | Get current user info |
+
+### Users
+
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|------|------|-------------|
+| GET | `/api/users` | Yes | OWNER, MANAGER | List all users in business |
+| GET | `/api/users/:id` | Yes | OWNER, MANAGER | Get user by ID |
+| POST | `/api/users` | Yes | OWNER | Create staff account |
+| PUT | `/api/users/:id` | Yes | OWNER, MANAGER | Update user |
+| PUT | `/api/users/:id/change-password` | Yes | Self only | Change password |
+| PUT | `/api/users/:id/deactivate` | Yes | OWNER | Deactivate user |
+| PUT | `/api/users/:id/activate` | Yes | OWNER | Activate user |
+| DELETE | `/api/users/:id` | Yes | OWNER | Delete user |
+
+### Health
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/health` | No | Health check |
+
+### Response Format
+
+**Success:**
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+**Error:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Email already exists",
+    "details": []
+  }
+}
+```
+
 ## Database
 
 ### ER Diagram

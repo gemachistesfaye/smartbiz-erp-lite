@@ -43,6 +43,19 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    const isAuthEndpoint =
+      originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/register');
+
+    if (isAuthEndpoint) {
+      const message =
+        error.response?.data?.error?.message ||
+        error.response?.data?.message ||
+        'An error occurred';
+      toast.error(message);
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -74,7 +87,8 @@ apiClient.interceptors.response.use(
           { refreshToken },
         );
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const refreshData = response.data.data;
+        const { accessToken, refreshToken: newRefreshToken } = refreshData;
 
         localStorage.setItem(STORAGE_KEYS.TOKEN, accessToken);
         localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
@@ -96,7 +110,9 @@ apiClient.interceptors.response.use(
     }
 
     const message =
-      error.response?.data?.error?.message || error.response?.data?.message || 'An error occurred';
+      error.response?.data?.error?.message ||
+      error.response?.data?.message ||
+      'An error occurred';
 
     if (error.response?.status === 403) {
       toast.error('You do not have permission to perform this action');
@@ -104,7 +120,7 @@ apiClient.interceptors.response.use(
       toast.error('Resource not found');
     } else if (error.response?.status >= 500) {
       toast.error('Server error. Please try again later.');
-    } else if (error.response?.status !== 401) {
+    } else {
       toast.error(message);
     }
 

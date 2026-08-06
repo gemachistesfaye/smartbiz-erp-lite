@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
@@ -179,6 +180,19 @@ describe('Auth (e2e)', () => {
         .send({ refreshToken: 'invalid-token' })
         .expect(401);
     });
+
+    it('should reject expired refresh token', () => {
+      const expiredToken = jwt.sign(
+        { sub: 'fake-user', email: 'fake@test.com', role: 'OWNER', businessId: 'fake' },
+        process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-key-for-local-development-only',
+        { expiresIn: '0s' },
+      );
+
+      return request(app.getHttpServer())
+        .post('/api/auth/refresh')
+        .send({ refreshToken: expiredToken })
+        .expect(401);
+    });
   });
 
   describe('GET /api/auth/me', () => {
@@ -205,6 +219,26 @@ describe('Auth (e2e)', () => {
 
     it('should reject unauthenticated request', () => {
       return request(app.getHttpServer()).get('/api/auth/me').expect(401);
+    });
+
+    it('should reject expired JWT', () => {
+      const expiredToken = jwt.sign(
+        { sub: 'fake-user', email: 'fake@test.com', role: 'OWNER', businessId: 'fake' },
+        process.env.JWT_SECRET || 'dev-jwt-secret-key-for-local-development-only',
+        { expiresIn: '0s' },
+      );
+
+      return request(app.getHttpServer())
+        .get('/api/auth/me')
+        .set('Authorization', `Bearer ${expiredToken}`)
+        .expect(401);
+    });
+
+    it('should reject malformed token', () => {
+      return request(app.getHttpServer())
+        .get('/api/auth/me')
+        .set('Authorization', 'Bearer not-a-real-token')
+        .expect(401);
     });
   });
 });
