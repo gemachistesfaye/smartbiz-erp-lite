@@ -5,12 +5,12 @@ export class CalculatePricingDto {
   @ApiProperty({ example: 5000 })
   @IsNumber()
   @Min(0)
-  buyingPrice: number;
+  buyingPrice!: number;
 
   @ApiProperty({ example: 100 })
   @IsNumber()
   @Min(1)
-  quantityPurchased: number;
+  quantityPurchased!: number;
 
   @ApiPropertyOptional({ example: 500 })
   @IsOptional()

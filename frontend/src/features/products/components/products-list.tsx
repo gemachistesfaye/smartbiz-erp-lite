@@ -18,7 +18,7 @@ import { ProductForm } from './product-form';
 import { useProducts, useDeleteProduct } from '../hooks/use-products';
 import { useCategories } from '@/features/categories/hooks/use-categories';
 import { useAllUnits } from '@/features/units/hooks/use-units';
-import { formatCurrency, formatDateTime } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/types/models';
 
 export function ProductsList() {

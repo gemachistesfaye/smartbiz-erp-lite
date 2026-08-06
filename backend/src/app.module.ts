@@ -8,6 +8,10 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { UnitsModule } from './modules/units/units.module';
 import { ProductsModule } from './modules/products/products.module';
 import { PricingModule } from './modules/pricing/pricing.module';
+import { SuppliersModule } from './modules/suppliers/suppliers.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { StockModule } from './modules/stock/stock.module';
+import { InventoryTransactionsModule } from './modules/inventory-transactions/inventory-transactions.module';
 import { PrismaModule } from './prisma/prisma.module';
 import configuration from './config/configuration';
 
@@ -31,6 +35,10 @@ import configuration from './config/configuration';
     UnitsModule,
     ProductsModule,
     PricingModule,
+    SuppliersModule,
+    InventoryModule,
+    StockModule,
+    InventoryTransactionsModule,
   ],
 })
 export class AppModule {}

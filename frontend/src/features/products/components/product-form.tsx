@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { useCreateProduct, useUpdateProduct, useCalculatePricing } from '../hooks/use-products';
 import { useCategories } from '@/features/categories/hooks/use-categories';
 import { useAllUnits } from '@/features/units/hooks/use-units';

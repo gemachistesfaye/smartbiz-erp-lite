@@ -13,7 +13,7 @@ export class CreateProductDto {
   @ApiProperty({ example: 'Samsung Galaxy A54' })
   @IsString()
   @MaxLength(200)
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 'SGA54-001' })
   @IsOptional()

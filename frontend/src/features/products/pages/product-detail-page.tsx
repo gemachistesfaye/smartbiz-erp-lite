@@ -1,9 +1,7 @@
+import { useParams } from '@tanstack/react-router';
 import { ProductDetailPage } from '../components/product-detail';
 
-interface ProductDetailPageWrapperProps {
-  params: { productId: string };
-}
-
-export function ProductDetailPageWrapper({ params }: ProductDetailPageWrapperProps) {
-  return <ProductDetailPage productId={params.productId} />;
+export function ProductDetailPageWrapper() {
+  const { productId } = useParams({ strict: false });
+  return <ProductDetailPage productId={productId as string} />;
 }

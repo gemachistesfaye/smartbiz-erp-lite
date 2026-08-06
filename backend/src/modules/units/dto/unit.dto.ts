@@ -5,12 +5,12 @@ export class CreateUnitDto {
   @ApiProperty({ example: 'Kilogram' })
   @IsString()
   @MaxLength(50)
-  name: string;
+  name!: string;
 
   @ApiProperty({ example: 'kg' })
   @IsString()
   @MaxLength(10)
-  symbol: string;
+  symbol!: string;
 
   @ApiPropertyOptional({ example: 'Weight measurement unit' })
   @IsOptional()

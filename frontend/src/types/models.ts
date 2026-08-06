@@ -93,7 +93,7 @@ export interface Product {
   updatedAt: string;
   deletedAt?: string;
   images?: ProductImage[];
-  inventory?: { quantity: number; minThreshold: number; maxThreshold?: number };
+  inventory?: Inventory;
   pricing?: PricingBreakdown;
 }
 
@@ -125,4 +125,137 @@ export interface ProductStats {
   total: number;
   active: number;
   inactive: number;
+}
+
+export interface Supplier {
+  id: string;
+  businessId: string;
+  name: string;
+  companyName?: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  tin?: string;
+  address?: string;
+  city?: string;
+  notes?: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  _count?: { purchases: number; stockReceivings: number };
+}
+
+export interface SupplierStats {
+  total: number;
+  active: number;
+  inactive: number;
+}
+
+export interface Inventory {
+  id: string;
+  productId: string;
+  quantity: number;
+  reservedQuantity: number;
+  minThreshold: number;
+  maxThreshold?: number;
+  averageCost: number;
+  inventoryValue: number;
+  lastUpdated: string;
+  createdAt: string;
+  updatedAt: string;
+  product?: {
+    id: string;
+    name: string;
+    sku?: string;
+    barcode?: string;
+    reorderLevel: number;
+    maxStock?: number;
+    sellingPrice: number;
+    buyingPrice: number;
+    unit?: { name: string; symbol: string };
+    category?: { name: string; color?: string };
+  };
+  availableQuantity?: number;
+  stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'overstock';
+}
+
+export interface InventoryStats {
+  totalProducts: number;
+  lowStock: number;
+  outOfStock: number;
+  overstock: number;
+  totalValue: number;
+}
+
+export interface StockReceiving {
+  id: string;
+  businessId: string;
+  supplierId?: string;
+  supplier?: { id: string; name: string; companyName?: string; phone?: string; email?: string };
+  purchaseReference?: string;
+  date: string;
+  subtotal: number;
+  transportationCost: number;
+  packagingCost: number;
+  storageCost: number;
+  laborCost: number;
+  otherCosts: number;
+  totalCost: number;
+  notes?: string;
+  status: 'DRAFT' | 'RECEIVED' | 'CANCELLED';
+  userId: string;
+  user?: { id: string; firstName: string; lastName: string };
+  items: StockReceivingItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockReceivingItem {
+  id: string;
+  stockReceivingId: string;
+  productId: string;
+  product?: { id: string; name: string; sku?: string; unit?: { symbol: string } };
+  quantity: number;
+  buyingPrice: number;
+  totalCost: number;
+}
+
+export interface StockAdjustment {
+  id: string;
+  businessId: string;
+  productId: string;
+  product?: { id: string; name: string; sku?: string };
+  type: 'ADJUSTMENT' | 'DAMAGE' | 'LOSS' | 'CORRECTION';
+  quantity: number;
+  reason: string;
+  notes?: string;
+  userId: string;
+  user?: { id: string; firstName: string; lastName: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryTransaction {
+  id: string;
+  businessId: string;
+  productId: string;
+  product?: { id: string; name: string; sku?: string; unit?: { name: string; symbol: string } };
+  type: 'STOCK_IN' | 'STOCK_OUT' | 'ADJUSTMENT' | 'TRANSFER' | 'RETURN' | 'DAMAGE' | 'LOSS' | 'CORRECTION';
+  quantity: number;
+  quantityBefore: number;
+  quantityAfter: number;
+  referenceId?: string;
+  referenceType?: string;
+  reason?: string;
+  userId: string;
+  user?: { id: string; firstName: string; lastName: string };
+  createdAt: string;
+}
+
+export interface TransactionStats {
+  todayTransactions: number;
+  monthTransactions: number;
+  byType: Record<string, number>;
 }

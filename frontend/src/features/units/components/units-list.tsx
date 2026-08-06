@@ -20,18 +20,16 @@ import { formatDateTime } from '@/lib/utils';
 import type { Unit } from '@/types/models';
 
 export function UnitsList() {
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
   const [deletingUnit, setDeletingUnit] = useState<Unit | null>(null);
 
-  const { data, isLoading } = useUnits({ search, page, limit: 20 });
+  const { data, isLoading } = useUnits({ page: 1, limit: 20 });
   const deleteUnit = useDeleteUnit();
 
   const units = data?.data || [];
 
-  const columns: Column<Unit>[] = [
+  const columns: Column<any>[] = [
     {
       key: 'name',
       header: 'Name',
@@ -111,7 +109,7 @@ export function UnitsList() {
         </Button>
       </div>
 
-      {units.length === 0 && !isLoading && !search ? (
+      {units.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <Ruler className="h-12 w-12 text-muted-foreground/50" />
           <h3 className="mt-4 text-lg font-semibold">No units yet</h3>
@@ -129,7 +127,6 @@ export function UnitsList() {
           data={units as unknown as Record<string, unknown>[]}
           searchable
           searchPlaceholder="Search units..."
-          onSearch={setSearch}
           pageSize={20}
           loading={isLoading}
           emptyMessage="No units found."

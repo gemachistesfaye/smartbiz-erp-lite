@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, RotateCcw, FolderTree } from 'lucide-react';
+import { Plus, Pencil, Trash2, FolderTree } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -15,24 +15,21 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DataTable, Column } from '@/components/shared/data-table';
 import { CategoryForm } from './category-form';
-import { useCategories, useDeleteCategory, useRestoreCategory } from '../hooks/use-categories';
+import { useCategories, useDeleteCategory } from '../hooks/use-categories';
 import { formatDateTime } from '@/lib/utils';
 import type { Category } from '@/types/models';
 
 export function CategoriesList() {
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
 
-  const { data, isLoading } = useCategories({ search, page, limit: 20 });
+  const { data, isLoading } = useCategories({ page: 1, limit: 20 });
   const deleteCategory = useDeleteCategory();
-  const restoreCategory = useRestoreCategory();
 
   const categories = data?.data || [];
 
-  const columns: Column<Category>[] = [
+  const columns: Column<any>[] = [
     {
       key: 'name',
       header: 'Name',
@@ -112,7 +109,7 @@ export function CategoriesList() {
         </Button>
       </div>
 
-      {categories.length === 0 && !isLoading && !search ? (
+      {categories.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <FolderTree className="h-12 w-12 text-muted-foreground/50" />
           <h3 className="mt-4 text-lg font-semibold">No categories yet</h3>
@@ -130,7 +127,6 @@ export function CategoriesList() {
           data={categories as unknown as Record<string, unknown>[]}
           searchable
           searchPlaceholder="Search categories..."
-          onSearch={setSearch}
           pageSize={20}
           loading={isLoading}
           emptyMessage="No categories found."

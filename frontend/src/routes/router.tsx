@@ -61,6 +61,36 @@ const InventoryPage = withSuspense(
     import('@/features/inventory/pages/inventory-page').then((m) => ({ default: m.InventoryPage })),
   ),
 );
+const InventoryHistoryPage = withSuspense(
+  lazy(() =>
+    import('@/features/inventory/pages/inventory-history-page').then((m) => ({ default: m.InventoryHistoryPage })),
+  ),
+);
+const LowStockPage = withSuspense(
+  lazy(() =>
+    import('@/features/inventory/pages/low-stock-page').then((m) => ({ default: m.LowStockPage })),
+  ),
+);
+const SuppliersPage = withSuspense(
+  lazy(() =>
+    import('@/features/suppliers/pages/suppliers-page').then((m) => ({ default: m.SuppliersPage })),
+  ),
+);
+const SupplierDetailPage = withSuspense(
+  lazy(() =>
+    import('@/features/suppliers/pages/supplier-detail-page').then((m) => ({ default: m.SupplierDetailPage })),
+  ),
+);
+const ReceiveStockPage = withSuspense(
+  lazy(() =>
+    import('@/features/stock/pages/receive-stock-page').then((m) => ({ default: m.ReceiveStockPage })),
+  ),
+);
+const AdjustStockPage = withSuspense(
+  lazy(() =>
+    import('@/features/stock/pages/adjust-stock-page').then((m) => ({ default: m.AdjustStockPage })),
+  ),
+);
 const CustomersPage = withSuspense(
   lazy(() =>
     import('@/features/customers/pages/customers-page').then((m) => ({ default: m.CustomersPage })),
@@ -178,6 +208,42 @@ const inventoryRoute = createRoute({
   component: InventoryPage,
 });
 
+const inventoryHistoryRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/inventory/history',
+  component: InventoryHistoryPage,
+});
+
+const lowStockRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/inventory/low-stock',
+  component: LowStockPage,
+});
+
+const suppliersRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/suppliers',
+  component: SuppliersPage,
+});
+
+const supplierDetailRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/suppliers/$supplierId',
+  component: SupplierDetailPage,
+});
+
+const receiveStockRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/stock/receive',
+  component: ReceiveStockPage,
+});
+
+const adjustStockRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/stock/adjust',
+  component: AdjustStockPage,
+});
+
 const customersRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: '/customers',
@@ -239,6 +305,12 @@ const routeTree = rootRoute.addChildren([
     categoriesRoute,
     unitsRoute,
     inventoryRoute,
+    inventoryHistoryRoute,
+    lowStockRoute,
+    suppliersRoute,
+    supplierDetailRoute,
+    receiveStockRoute,
+    adjustStockRoute,
     customersRoute,
     salesRoute,
     expensesRoute,

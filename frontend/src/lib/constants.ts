@@ -29,6 +29,32 @@ export const API_ENDPOINTS = {
   PRICING: {
     CALCULATE: '/pricing/calculate',
   },
+  SUPPLIERS: {
+    BASE: '/suppliers',
+    BY_ID: (id: string) => `/suppliers/${id}`,
+    RESTORE: (id: string) => `/suppliers/${id}/restore`,
+    STATS: '/suppliers/stats',
+    ACTIVE: '/suppliers/active',
+  },
+  INVENTORY: {
+    BASE: '/inventory',
+    BY_PRODUCT: (productId: string) => `/inventory/product/${productId}`,
+    STATS: '/inventory/stats',
+    LOW_STOCK: '/inventory/low-stock',
+    OUT_OF_STOCK: '/inventory/out-of-stock',
+  },
+  STOCK: {
+    RECEIVE: '/stock/receive',
+    RECEIVE_LIST: '/stock/receive',
+    RECEIVE_BY_ID: (id: string) => `/stock/receive/${id}`,
+    CANCEL_RECEIVING: (id: string) => `/stock/receive/${id}/cancel`,
+    ADJUST: '/stock/adjust',
+  },
+  INVENTORY_TRANSACTIONS: {
+    BASE: '/inventory-transactions',
+    STATS: '/inventory-transactions/stats',
+    BY_PRODUCT: (productId: string) => `/inventory-transactions/product/${productId}`,
+  },
   CUSTOMERS: {
     BASE: '/customers',
     BY_ID: (id: string) => `/customers/${id}`,
@@ -37,10 +63,6 @@ export const API_ENDPOINTS = {
     BASE: '/sales',
     BY_ID: (id: string) => `/sales/${id}`,
     CHECKOUT: '/sales/checkout',
-  },
-  INVENTORY: {
-    BASE: '/inventory',
-    TRANSACTIONS: '/inventory/transactions',
   },
   EXPENSES: {
     BASE: '/expenses',
@@ -90,6 +112,8 @@ export const NAV_ITEMS = [
   { name: 'Categories', href: '/categories' },
   { name: 'Units', href: '/units' },
   { name: 'Inventory', href: '/inventory' },
+  { name: 'Suppliers', href: '/suppliers' },
+  { name: 'Receive Stock', href: '/stock/receive' },
   { name: 'Customers', href: '/customers' },
   { name: 'Sales', href: '/sales' },
   { name: 'Expenses', href: '/expenses' },
