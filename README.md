@@ -4,6 +4,7 @@ A production-ready Offline-First ERP Progressive Web Application designed for Et
 
 ## Features
 
+- **Dashboard** - KPI overview, charts, quick actions, activity feed
 - **Products** - Product catalog management
 - **Inventory** - Stock tracking and management
 - **Pricing** - Dynamic pricing engine
@@ -26,6 +27,8 @@ A production-ready Offline-First ERP Progressive Web Application designed for Et
 - Shadcn UI
 - React Hook Form
 - Zod
+- Recharts (charts)
+- Lucide Icons
 
 ### Backend
 - NestJS
@@ -86,12 +89,28 @@ npm run dev
 smartbiz-erp-lite/
 ├── frontend/          # React PWA (Vite + TypeScript)
 │   ├── src/
-│   │   ├── app/       # Shell, providers, routes, layout
-│   │   ├── components/ # Shared: ui/ (Shadcn), layout/, shared/
+│   │   ├── app/       # App shell and providers
+│   │   ├── components/
+│   │   │   ├── ui/        # Reusable UI primitives (Shadcn)
+│   │   │   ├── layout/    # Sidebar, Navbar, DashboardLayout
+│   │   │   ├── dashboard/ # Dashboard widgets and charts
+│   │   │   └── shared/    # Shared components (DataTable, errors)
 │   │   ├── features/  # Domain-driven modules
+│   │   │   ├── auth/      # Authentication (store, hooks, forms)
+│   │   │   ├── dashboard/ # Dashboard page
+│   │   │   ├── products/  # Products (placeholder)
+│   │   │   ├── categories/# Categories (placeholder)
+│   │   │   ├── inventory/ # Inventory (placeholder)
+│   │   │   ├── customers/ # Customers (placeholder)
+│   │   │   ├── sales/     # Sales (placeholder)
+│   │   │   ├── expenses/  # Expenses (placeholder)
+│   │   │   ├── reports/   # Reports (placeholder)
+│   │   │   ├── settings/  # Settings (placeholder)
+│   │   │   └── profile/   # Profile (placeholder)
 │   │   ├── hooks/     # Custom React hooks
 │   │   ├── lib/       # Utilities, API client, constants
 │   │   ├── routes/    # TanStack Router routes
+│   │   ├── stores/    # Zustand stores
 │   │   └── types/     # TypeScript types
 │   └── ...
 ├── backend/           # NestJS API
@@ -111,6 +130,132 @@ smartbiz-erp-lite/
 ├── .github/           # GitHub Actions workflows
 └── docker-compose.yml # Local development database
 ```
+
+## Dashboard Architecture
+
+### Layout Components
+
+- **DashboardLayout** — Main layout with sidebar, navbar, and content area
+- **Sidebar** — Collapsible navigation with active states, mobile drawer support
+- **Navbar** — Top bar with search, notifications, theme toggle, user menu
+- **Breadcrumbs** — Auto-generated from current route path
+
+### Dashboard Widgets
+
+- **StatCard** — KPI cards with trend indicators (up/down arrows, percentages)
+- **ChartCard** — Wrapper for chart components with title and description
+- **TableCard** — Card wrapper for table lists with "View All" link
+- **ActivityCard** — Timeline-style activity feed with colored type indicators
+- **QuickActionCard** — Clickable action cards for common operations
+
+### Charts (Recharts)
+
+- **SalesTrendChart** — Area chart (sales vs expenses over time)
+- **RevenueChart** — Bar chart (monthly revenue)
+- **InventoryDistributionChart** — Donut chart (inventory by category)
+- **TopProductsChart** — Horizontal bar chart (best-selling products)
+- **ExpenseBreakdownChart** — Pie chart (expense categories)
+
+### DataTable
+
+Reusable data table with:
+- Column-based sorting (ascending/descending)
+- Full-text search with filtering
+- Pagination with page navigation
+- Empty state, loading state
+- Accessible markup (ARIA labels, roles)
+
+## Routing Structure
+
+| Route | Page | Auth Required |
+|-------|------|:------------:|
+| `/` | Redirects to `/dashboard` | No |
+| `/login` | Login page | No |
+| `/register` | Register page | No |
+| `/dashboard` | Dashboard homepage | Yes |
+| `/products` | Products list | Yes |
+| `/categories` | Categories list | Yes |
+| `/inventory` | Inventory management | Yes |
+| `/customers` | Customer management | Yes |
+| `/sales` | Sales / POS | Yes |
+| `/expenses` | Expense tracking | Yes |
+| `/reports` | Reports & analytics | Yes |
+| `/settings` | Business settings | Yes |
+| `/profile` | User profile | Yes |
+| `*` | 404 Not Found | No |
+
+## Theme Support
+
+- **Light mode** — Default theme
+- **Dark mode** — Via toggle in navbar
+- **System preference** — Auto-detected on first visit
+- **Persistence** — Saved to localStorage
+
+Toggle the theme using the sun/moon icon in the top navigation bar.
+
+## Reusable UI Components
+
+| Component | Source | Description |
+|-----------|--------|-------------|
+| Button | Shadcn UI | Variants: default, destructive, outline, secondary, ghost, link |
+| Card | Shadcn UI | Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter |
+| Input | Shadcn UI | Text input with focus states |
+| Badge | Shadcn UI | Status badges with variants |
+| Skeleton | Shadcn UI | Loading placeholder |
+| Dialog | Radix UI | Modal dialogs |
+| DropdownMenu | Radix UI | Dropdown menus |
+| Avatar | Radix UI | User avatars with fallbacks |
+| Select | Radix UI | Dropdown select |
+| Tabs | Radix UI | Tabbed navigation |
+| Tooltip | Radix UI | Hover tooltips |
+| Popover | Radix UI | Click-triggered popovers |
+| Separator | Radix UI | Visual dividers |
+| Spinner | Custom | Loading spinner |
+| Toast | Custom | Notification toasts |
+
+## Custom Hooks
+
+| Hook | Description |
+|------|-------------|
+| `useTheme` | Theme management (get, set, toggle) |
+| `useOnlineStatus` | Network connectivity status |
+| `useMediaQuery` | Responsive breakpoint detection |
+| `useIsMobile` | Mobile viewport check |
+| `useIsTablet` | Tablet viewport check |
+| `useIsDesktop` | Desktop viewport check |
+| `useDebounce` | Debounced callback execution |
+
+## Zustand Stores
+
+| Store | Description |
+|-------|-------------|
+| `useAuthStore` | Authentication state (user, tokens, login/logout) |
+| `useUIStore` | UI state (sidebar open/collapsed) |
+
+## Error Pages
+
+| Page | Status Code | Description |
+|------|:-----------:|-------------|
+| NotFoundPage | 404 | Page not found |
+| UnauthorizedPage | 403 | Access denied |
+| ServerErrorPage | 500 | Server error with retry option |
+
+## Testing
+
+```bash
+# Run all tests
+cd frontend && npm run test
+
+# Run specific test suite
+npx vitest run src/components/dashboard/
+npx vitest run src/components/shared/
+```
+
+### Test Coverage
+
+- Dashboard widgets: StatCard, ActivityCard, QuickActionCard
+- Shared components: DataTable, error pages
+- Auth forms: LoginForm, RegisterForm (pre-existing)
 
 ## Available Scripts
 
@@ -132,6 +277,7 @@ npm run dev:frontend     # Start frontend only
 npm run build:frontend   # Build frontend only
 npm run lint:frontend    # Lint frontend only
 npm run test:frontend    # Test frontend only
+npm run typecheck        # Type check frontend
 ```
 
 ### Backend
@@ -150,14 +296,6 @@ npm run db:generate      # Generate Prisma client
 npm run db:migrate       # Run migrations
 npm run db:seed          # Seed database
 npm run db:studio        # Open Prisma Studio
-```
-
-### Docker
-
-```bash
-npm run docker:up        # Start Docker containers
-npm run docker:down      # Stop Docker containers
-npm run docker:logs      # View Docker logs
 ```
 
 ## Environment Variables
@@ -187,11 +325,6 @@ THROTTLE_TTL=60000
 THROTTLE_LIMIT=100
 ```
 
-## API Documentation
-
-Once the backend is running, access the Swagger documentation at:
-http://localhost:3001/docs
-
 ## Authentication
 
 ### Flow
@@ -206,12 +339,6 @@ Dashboard ← Navigate ← setAuth(store) ← API Response
                                     Logout → Delete refresh token → Clear store → /login
 ```
 
-1. **Register** — Creates a Business record and an Owner user. Returns JWT pair.
-2. **Login** — Validates credentials, returns JWT access token (24h) + refresh token (7d).
-3. **Access** — Frontend stores tokens in localStorage. API client attaches `Authorization: Bearer <token>` to every request.
-4. **Refresh** — When access token expires (401), the API client automatically calls `/auth/refresh` with the refresh token to get new tokens.
-5. **Logout** — Deletes refresh token from database, clears localStorage, redirects to `/login`.
-
 ### JWT Tokens
 
 | Token | Lifetime | Secret | Purpose |
@@ -219,168 +346,24 @@ Dashboard ← Navigate ← setAuth(store) ← API Response
 | Access Token | 24 hours | `JWT_SECRET` | Authenticate API requests |
 | Refresh Token | 7 days | `JWT_REFRESH_SECRET` | Get new access tokens |
 
-### Security Features
-
-- bcrypt password hashing (12 salt rounds)
-- Passwords never returned in API responses
-- Helmet security headers
-- Rate limiting (100 requests/60s)
-- CORS configured per environment
-- Input validation via DTOs (whitelist + forbidNonWhitelisted)
-- Soft delete for users (deletedAt)
-
 ## User Roles & Permissions
 
 | Action | OWNER | MANAGER | CASHIER |
 |--------|:-----:|:-------:|:-------:|
 | **User Management** | | | |
-| Create staff | ✅ | ❌ | ❌ |
-| View users | ✅ | ✅ | ❌ |
-| Update users | ✅ | ✅ | ❌ |
-| Deactivate users | ✅ | ❌ | ❌ |
-| Activate users | ✅ | ❌ | ❌ |
-| Delete users | ✅ | ❌ | ❌ |
-| Change own password | ✅ | ✅ | ✅ |
+| Create staff | Yes | No | No |
+| View users | Yes | Yes | No |
+| Update users | Yes | Yes | No |
+| Deactivate users | Yes | No | No |
+| Change own password | Yes | Yes | Yes |
 | **Business** | | | |
-| Full access | ✅ | ❌ | ❌ |
-| **Products/Inventory** (Phase 2) | | | |
-| Manage products | ✅ | ✅ | ❌ |
-| View products | ✅ | ✅ | ✅ |
-| **Sales** (Phase 2) | | | |
-| Process sales | ✅ | ✅ | ✅ |
-| View reports | ✅ | ✅ | ❌ |
-
-**Note:** Owner account cannot be deactivated, deleted, or have its role changed.
-
-## API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | No | Register new business + owner |
-| POST | `/api/auth/login` | No | Login with email/password |
-| POST | `/api/auth/refresh` | No | Refresh access token |
-| POST | `/api/auth/logout` | Yes | Logout (remove refresh token) |
-| POST | `/api/auth/logout-all` | Yes | Logout from all devices |
-| GET | `/api/auth/me` | Yes | Get current user info |
-
-### Users
-
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | `/api/users` | Yes | OWNER, MANAGER | List all users in business |
-| GET | `/api/users/:id` | Yes | OWNER, MANAGER | Get user by ID |
-| POST | `/api/users` | Yes | OWNER | Create staff account |
-| PUT | `/api/users/:id` | Yes | OWNER, MANAGER | Update user |
-| PUT | `/api/users/:id/change-password` | Yes | Self only | Change password |
-| PUT | `/api/users/:id/deactivate` | Yes | OWNER | Deactivate user |
-| PUT | `/api/users/:id/activate` | Yes | OWNER | Activate user |
-| DELETE | `/api/users/:id` | Yes | OWNER | Delete user |
-
-### Health
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/health` | No | Health check |
-
-### Response Format
-
-**Success:**
-```json
-{
-  "success": true,
-  "data": { ... }
-}
-```
-
-**Error:**
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Email already exists",
-    "details": []
-  }
-}
-```
-
-## Database
-
-### ER Diagram
-
-The database schema follows a multi-tenant architecture with the following core models:
-- Business (tenant)
-- User
-- Product
-- Inventory
-- Customer
-- Sale
-- Expense
-
-See `docs/02-design/database-design/04-er-diagrams.md` for the complete ER diagram.
-
-### Migrations
-
-```bash
-# Create a new migration
-cd backend
-npx prisma migrate dev --name migration_name
-
-# Apply migrations in production
-npm run prisma:migrate:prod
-```
-
-## Development Guidelines
-
-### Code Style
-
-- Follow the engineering standards in `docs/01-planning/engineering-standards.md`
-- Use TypeScript strict mode
-- Follow Clean Architecture principles
-- Use functional components for React
-- Use NestJS patterns (Controller → Service → Prisma)
-
-### Git Workflow
-
-- Branch naming: `feature/`, `bugfix/`, `hotfix/`, `docs/`
-- Commit messages follow Conventional Commits
-- PR targets `develop` branch
-- Squash merge for clean history
-
-### Testing
-
-- Unit tests for services
-- Integration tests for API endpoints
-- Component tests for UI components
-- E2E tests for critical flows
-
-## Deployment
-
-### Frontend (Vercel)
-
-```bash
-# Build and deploy
-cd frontend
-npm run build
-vercel deploy
-```
-
-### Backend (Railway)
-
-```bash
-# Build and deploy
-cd backend
-npm run build
-railway deploy
-```
-
-### Database (Railway/Supabase)
-
-1. Create a PostgreSQL instance
-2. Update `DATABASE_URL` in environment variables
-3. Run migrations: `npm run prisma:migrate:prod`
+| Full access | Yes | No | No |
+| **Products/Inventory** | | | |
+| Manage products | Yes | Yes | No |
+| View products | Yes | Yes | Yes |
+| **Sales** | | | |
+| Process sales | Yes | Yes | Yes |
+| View reports | Yes | Yes | No |
 
 ## License
 

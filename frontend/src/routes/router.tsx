@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import {
   createRouter,
   createRoute,
@@ -8,12 +9,91 @@ import {
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { LoginPage } from '@/features/auth/pages/login-page';
-import { RegisterPage } from '@/features/auth/pages/register-page';
-import { DashboardPage } from '@/features/dashboard/pages/dashboard-page';
+import { ServerErrorPage } from '@/components/shared/server-error-page';
+
+function withSuspense(Component: React.LazyExoticComponent<React.ComponentType>) {
+  return function SuspenseWrapper() {
+    return (
+      <Suspense fallback={<LoadingScreen />}>
+        <Component />
+      </Suspense>
+    );
+  };
+}
+
+const LoginPage = withSuspense(
+  lazy(() =>
+    import('@/features/auth/pages/login-page').then((m) => ({ default: m.LoginPage })),
+  ),
+);
+const RegisterPage = withSuspense(
+  lazy(() =>
+    import('@/features/auth/pages/register-page').then((m) => ({ default: m.RegisterPage })),
+  ),
+);
+const DashboardPage = withSuspense(
+  lazy(() =>
+    import('@/features/dashboard/pages/dashboard-page').then((m) => ({ default: m.DashboardPage })),
+  ),
+);
+const ProductsPage = withSuspense(
+  lazy(() =>
+    import('@/features/products/pages/products-page').then((m) => ({ default: m.ProductsPage })),
+  ),
+);
+const CategoriesPage = withSuspense(
+  lazy(() =>
+    import('@/features/categories/pages/categories-page').then((m) => ({ default: m.CategoriesPage })),
+  ),
+);
+const InventoryPage = withSuspense(
+  lazy(() =>
+    import('@/features/inventory/pages/inventory-page').then((m) => ({ default: m.InventoryPage })),
+  ),
+);
+const CustomersPage = withSuspense(
+  lazy(() =>
+    import('@/features/customers/pages/customers-page').then((m) => ({ default: m.CustomersPage })),
+  ),
+);
+const SalesPage = withSuspense(
+  lazy(() =>
+    import('@/features/sales/pages/sales-page').then((m) => ({ default: m.SalesPage })),
+  ),
+);
+const ExpensesPage = withSuspense(
+  lazy(() =>
+    import('@/features/expenses/pages/expenses-page').then((m) => ({ default: m.ExpensesPage })),
+  ),
+);
+const ReportsPage = withSuspense(
+  lazy(() =>
+    import('@/features/reports/pages/reports-page').then((m) => ({ default: m.ReportsPage })),
+  ),
+);
+const SettingsPage = withSuspense(
+  lazy(() =>
+    import('@/features/settings/pages/settings-page').then((m) => ({ default: m.SettingsPage })),
+  ),
+);
+const ProfilePage = withSuspense(
+  lazy(() =>
+    import('@/features/profile/pages/profile-page').then((m) => ({ default: m.ProfilePage })),
+  ),
+);
+const NotFoundPage = withSuspense(
+  lazy(() =>
+    import('@/components/shared/not-found-page').then((m) => ({ default: m.NotFoundPage })),
+  ),
+);
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
+  errorComponent: ({ error }) => (
+    <ServerErrorPage
+      message={error?.message || 'An unexpected error occurred.'}
+    />
+  ),
 });
 
 const loginRoute = createRoute({
@@ -58,6 +138,60 @@ const dashboardRoute = createRoute({
   component: DashboardPage,
 });
 
+const productsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/products',
+  component: ProductsPage,
+});
+
+const categoriesRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/categories',
+  component: CategoriesPage,
+});
+
+const inventoryRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/inventory',
+  component: InventoryPage,
+});
+
+const customersRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/customers',
+  component: CustomersPage,
+});
+
+const salesRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/sales',
+  component: SalesPage,
+});
+
+const expensesRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/expenses',
+  component: ExpensesPage,
+});
+
+const reportsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/reports',
+  component: ReportsPage,
+});
+
+const settingsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/settings',
+  component: SettingsPage,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/profile',
+  component: ProfilePage,
+});
+
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -69,21 +203,25 @@ const indexRoute = createRoute({
 const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
-  component: () => (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold">404</h1>
-        <p className="text-muted-foreground mt-2">Page not found</p>
-      </div>
-    </div>
-  ),
+  component: NotFoundPage,
 });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
-  dashboardLayoutRoute.addChildren([dashboardRoute]),
+  dashboardLayoutRoute.addChildren([
+    dashboardRoute,
+    productsRoute,
+    categoriesRoute,
+    inventoryRoute,
+    customersRoute,
+    salesRoute,
+    expensesRoute,
+    reportsRoute,
+    settingsRoute,
+    profileRoute,
+  ]),
   notFoundRoute,
 ]);
 
@@ -91,12 +229,9 @@ export const router = createRouter({
   routeTree,
   defaultPendingComponent: LoadingScreen,
   defaultErrorComponent: ({ error }) => (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold">Error</h1>
-        <p className="text-muted-foreground mt-2">{error?.message || 'Something went wrong'}</p>
-      </div>
-    </div>
+    <ServerErrorPage
+      message={error?.message || 'Something went wrong.'}
+    />
   ),
 });
 

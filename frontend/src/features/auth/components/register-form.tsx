@@ -58,6 +58,14 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {register.isError && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {(register.error as { response?: { data?: { error?: { message?: string }; message?: string } } })?.response?.data?.error?.message ||
+            (register.error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+            'Registration failed. Please try again.'}
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="businessName">Business Name</Label>
         <Input

@@ -48,11 +48,6 @@ apiClient.interceptors.response.use(
       originalRequest.url?.includes('/auth/register');
 
     if (isAuthEndpoint) {
-      const message =
-        error.response?.data?.error?.message ||
-        error.response?.data?.message ||
-        'An error occurred';
-      toast.error(message);
       return Promise.reject(error);
     }
 

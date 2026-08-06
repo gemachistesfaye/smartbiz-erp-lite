@@ -34,6 +34,14 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {login.isError && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {(login.error as { response?: { data?: { error?: { message?: string }; message?: string } } })?.response?.data?.error?.message ||
+            (login.error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+            'Login failed. Please check your credentials.'}
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input

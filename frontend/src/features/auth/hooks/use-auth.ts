@@ -65,7 +65,11 @@ export function useLogout() {
   return useMutation({
     mutationFn: async () => {
       if (refreshToken) {
-        await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+        try {
+          await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+        } catch {
+          // Token may be expired - that's fine, we still clear local state
+        }
       }
     },
     onSettled: async () => {

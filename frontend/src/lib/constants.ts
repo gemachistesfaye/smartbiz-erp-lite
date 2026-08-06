@@ -72,3 +72,16 @@ export const ROLE_LABELS: Record<string, string> = {
   MANAGER: 'Manager',
   CASHIER: 'Cashier',
 };
+
+export const NAV_ITEMS = [
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Products', href: '/products' },
+  { name: 'Categories', href: '/categories' },
+  { name: 'Inventory', href: '/inventory' },
+  { name: 'Customers', href: '/customers' },
+  { name: 'Sales', href: '/sales' },
+  { name: 'Expenses', href: '/expenses' },
+  { name: 'Reports', href: '/reports' },
+  { name: 'Settings', href: '/settings' },
+  { name: 'Profile', href: '/profile' },
+] as const;
