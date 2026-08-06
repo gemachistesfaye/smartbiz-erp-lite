@@ -41,9 +41,19 @@ const ProductsPage = withSuspense(
     import('@/features/products/pages/products-page').then((m) => ({ default: m.ProductsPage })),
   ),
 );
+const ProductDetailPage = withSuspense(
+  lazy(() =>
+    import('@/features/products/pages/product-detail-page').then((m) => ({ default: m.ProductDetailPageWrapper })),
+  ),
+);
 const CategoriesPage = withSuspense(
   lazy(() =>
     import('@/features/categories/pages/categories-page').then((m) => ({ default: m.CategoriesPage })),
+  ),
+);
+const UnitsPage = withSuspense(
+  lazy(() =>
+    import('@/features/units/pages/units-page').then((m) => ({ default: m.UnitsPage })),
   ),
 );
 const InventoryPage = withSuspense(
@@ -144,10 +154,22 @@ const productsRoute = createRoute({
   component: ProductsPage,
 });
 
+const productDetailRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/products/$productId',
+  component: ProductDetailPage,
+});
+
 const categoriesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: '/categories',
   component: CategoriesPage,
+});
+
+const unitsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/units',
+  component: UnitsPage,
 });
 
 const inventoryRoute = createRoute({
@@ -213,7 +235,9 @@ const routeTree = rootRoute.addChildren([
   dashboardLayoutRoute.addChildren([
     dashboardRoute,
     productsRoute,
+    productDetailRoute,
     categoriesRoute,
+    unitsRoute,
     inventoryRoute,
     customersRoute,
     salesRoute,

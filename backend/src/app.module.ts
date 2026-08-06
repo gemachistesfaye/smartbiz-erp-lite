@@ -4,6 +4,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { UnitsModule } from './modules/units/units.module';
+import { ProductsModule } from './modules/products/products.module';
+import { PricingModule } from './modules/pricing/pricing.module';
 import { PrismaModule } from './prisma/prisma.module';
 import configuration from './config/configuration';
 
@@ -23,6 +27,10 @@ import configuration from './config/configuration';
     HealthModule,
     AuthModule,
     UsersModule,
+    CategoriesModule,
+    UnitsModule,
+    ProductsModule,
+    PricingModule,
   ],
 })
 export class AppModule {}

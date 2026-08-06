@@ -13,10 +13,21 @@ export const API_ENDPOINTS = {
   PRODUCTS: {
     BASE: '/products',
     BY_ID: (id: string) => `/products/${id}`,
+    RESTORE: (id: string) => `/products/${id}/restore`,
+    STATS: '/products/stats',
   },
   CATEGORIES: {
     BASE: '/categories',
     BY_ID: (id: string) => `/categories/${id}`,
+    RESTORE: (id: string) => `/categories/${id}/restore`,
+  },
+  UNITS: {
+    BASE: '/units',
+    BY_ID: (id: string) => `/units/${id}`,
+    RESTORE: (id: string) => `/units/${id}/restore`,
+  },
+  PRICING: {
+    CALCULATE: '/pricing/calculate',
   },
   CUSTOMERS: {
     BASE: '/customers',
@@ -77,6 +88,7 @@ export const NAV_ITEMS = [
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Products', href: '/products' },
   { name: 'Categories', href: '/categories' },
+  { name: 'Units', href: '/units' },
   { name: 'Inventory', href: '/inventory' },
   { name: 'Customers', href: '/customers' },
   { name: 'Sales', href: '/sales' },

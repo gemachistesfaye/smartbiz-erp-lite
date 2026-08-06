@@ -57,6 +57,11 @@ enum NotificationType {
   SYSTEM_ALERT
 }
 
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum AuditAction {
   CREATE
   UPDATE
@@ -160,10 +165,13 @@ model Category {
   business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name        String   @db.VarChar(100)
   description String?  @db.Text
+  color       String?  @db.VarChar(7)
+  icon        String?  @db.VarChar(50)
   isActive    Boolean  @default(true)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
 
   products Product[]
 
@@ -177,10 +185,12 @@ model Unit {
   business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name        String   @db.VarChar(50)
   symbol      String   @db.VarChar(10)
+  description String?  @db.Text
   isActive    Boolean  @default(true)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
 
   products Product[]
 
@@ -200,16 +210,33 @@ model Product {
   name          String   @db.VarChar(200)
   sku           String?  @db.VarChar(50)
   barcode       String?  @db.VarChar(100)
+  brand         String?  @db.VarChar(100)
   description   String?  @db.Text
-  baseCost      Decimal  @default(0) @db.Decimal(12, 2)
-  overheadCost  Decimal  @default(0) @db.Decimal(12, 2)
-  sellingPrice  Decimal  @default(0) @db.Decimal(12, 2)
-  isActive      Boolean  @default(true)
+
+  buyingPrice        Decimal @default(0) @db.Decimal(12, 2)
+  quantityPurchased  Int     @default(1)
+  transportationCost Decimal @default(0) @db.Decimal(12, 2)
+  loadingCost        Decimal @default(0) @db.Decimal(12, 2)
+  packagingCost      Decimal @default(0) @db.Decimal(12, 2)
+  storageCost        Decimal @default(0) @db.Decimal(12, 2)
+  laborCost          Decimal @default(0) @db.Decimal(12, 2)
+  customsCost        Decimal @default(0) @db.Decimal(12, 2)
+  otherCosts         Decimal @default(0) @db.Decimal(12, 2)
+  vatPercentage      Decimal @default(0) @db.Decimal(5, 2)
+  profitPercentage   Decimal @default(0) @db.Decimal(5, 2)
+  sellingPrice       Decimal @default(0) @db.Decimal(12, 2)
+  manualSellingPrice Boolean @default(false)
+
+  reorderLevel   Int      @default(0)
+  maxStock       Int?
+  status         ProductStatus @default(ACTIVE)
+  isActive       Boolean  @default(true)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   deletedAt     DateTime?
 
+  images              ProductImage[]
   inventory              Inventory?
   saleItems              SaleItem[]
   purchaseItems          PurchaseItem[]
@@ -220,8 +247,23 @@ model Product {
   @@index([businessId])
   @@index([businessId, categoryId])
   @@index([businessId, name])
+  @@index([businessId, status])
   @@index([barcode])
   @@index([sku])
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String  @db.VarChar(500)
+  alt       String? @db.VarChar(200)
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
 }
 
 model Inventory {

@@ -5,9 +5,11 @@ A production-ready Offline-First ERP Progressive Web Application designed for Et
 ## Features
 
 - **Dashboard** - KPI overview, charts, quick actions, activity feed
-- **Products** - Product catalog management
+- **Products** - Complete product catalog with pricing engine
+- **Categories** - Product category management with soft delete
+- **Units** - Measurement unit management (Piece, Kg, Liter, etc.)
+- **Pricing Engine** - Automatic selling price calculation with cost breakdown
 - **Inventory** - Stock tracking and management
-- **Pricing** - Dynamic pricing engine
 - **Customers** - Customer management with credit tracking
 - **Sales** - Point of Sale (POS) and sales management
 - **Expenses** - Expense tracking and categorization
@@ -98,8 +100,9 @@ smartbiz-erp-lite/
 │   │   ├── features/  # Domain-driven modules
 │   │   │   ├── auth/      # Authentication (store, hooks, forms)
 │   │   │   ├── dashboard/ # Dashboard page
-│   │   │   ├── products/  # Products (placeholder)
-│   │   │   ├── categories/# Categories (placeholder)
+│   │   │   ├── products/  # Products (CRUD, form, detail, hooks)
+│   │   │   ├── categories/# Categories (CRUD, form, list, hooks)
+│   │   │   ├── units/     # Units (CRUD, form, list, hooks)
 │   │   │   ├── inventory/ # Inventory (placeholder)
 │   │   │   ├── customers/ # Customers (placeholder)
 │   │   │   ├── sales/     # Sales (placeholder)
@@ -117,7 +120,14 @@ smartbiz-erp-lite/
 │   ├── src/
 │   │   ├── common/    # Guards, decorators, filters, interceptors
 │   │   ├── config/    # Configuration module
-│   │   ├── modules/   # Feature modules (auth, users, health)
+│   │   ├── modules/   # Feature modules
+│   │   │   ├── auth/      # Authentication
+│   │   │   ├── users/     # User management
+│   │   │   ├── categories/# Category CRUD
+│   │   │   ├── units/     # Unit CRUD
+│   │   │   ├── products/  # Product CRUD
+│   │   │   ├── pricing/   # Pricing engine service
+│   │   │   └── health/    # Health check
 │   │   └── prisma/    # Prisma service
 │   ├── prisma/
 │   │   ├── schema.prisma
@@ -174,7 +184,9 @@ Reusable data table with:
 | `/register` | Register page | No |
 | `/dashboard` | Dashboard homepage | Yes |
 | `/products` | Products list | Yes |
+| `/products/:id` | Product detail with pricing | Yes |
 | `/categories` | Categories list | Yes |
+| `/units` | Units list | Yes |
 | `/inventory` | Inventory management | Yes |
 | `/customers` | Customer management | Yes |
 | `/sales` | Sales / POS | Yes |
@@ -183,6 +195,80 @@ Reusable data table with:
 | `/settings` | Business settings | Yes |
 | `/profile` | User profile | Yes |
 | `*` | 404 Not Found | No |
+
+## Product Management Module
+
+### API Endpoints
+
+#### Categories
+| Method | Endpoint | Description | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/categories` | List all categories | Owner, Manager, Cashier |
+| GET | `/api/categories/:id` | Get category by ID | Owner, Manager, Cashier |
+| POST | `/api/categories` | Create category | Owner, Manager |
+| PATCH | `/api/categories/:id` | Update category | Owner, Manager |
+| DELETE | `/api/categories/:id` | Soft delete category | Owner |
+| PATCH | `/api/categories/:id/restore` | Restore deleted category | Owner |
+
+#### Units
+| Method | Endpoint | Description | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/units` | List all units | Owner, Manager, Cashier |
+| GET | `/api/units/:id` | Get unit by ID | Owner, Manager, Cashier |
+| POST | `/api/units` | Create unit | Owner, Manager |
+| PATCH | `/api/units/:id` | Update unit | Owner, Manager |
+| DELETE | `/api/units/:id` | Soft delete unit | Owner |
+| PATCH | `/api/units/:id/restore` | Restore deleted unit | Owner |
+
+#### Products
+| Method | Endpoint | Description | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/products` | List products (filterable) | Owner, Manager, Cashier |
+| GET | `/api/products/stats` | Get product statistics | Owner, Manager |
+| GET | `/api/products/:id` | Get product with pricing | Owner, Manager, Cashier |
+| POST | `/api/products` | Create product | Owner, Manager |
+| PATCH | `/api/products/:id` | Update product | Owner, Manager |
+| DELETE | `/api/products/:id` | Soft delete product | Owner |
+| PATCH | `/api/products/:id/restore` | Restore deleted product | Owner |
+
+#### Pricing
+| Method | Endpoint | Description | Roles |
+|--------|----------|-------------|-------|
+| POST | `/api/pricing/calculate` | Calculate pricing breakdown | Owner, Manager, Cashier |
+
+### Pricing Engine
+
+The pricing engine automatically calculates selling prices based on:
+
+1. **Buying Price** - Base cost of the product
+2. **Additional Costs** - Transportation, loading, packaging, storage, labor, customs, other
+3. **VAT** - Value Added Tax percentage
+4. **Profit Margin** - Desired profit percentage
+
+**Formula:**
+```
+Total Cost = Buying Price + Sum(Additional Costs)
+Cost Per Unit = Total Cost / Quantity Purchased
+VAT Per Unit = Cost Per Unit * (VAT% / 100)
+Cost + VAT = Cost Per Unit + VAT Per Unit
+Selling Price = Cost + VAT * (1 + Profit% / 100)
+```
+
+The engine also supports **manual selling price override** for special pricing scenarios.
+
+### Database Schema
+
+**Category** - `id`, `businessId`, `name`, `description`, `color`, `icon`, `isActive`, `deletedAt`
+- Unique constraint: `(businessId, name)`
+
+**Unit** - `id`, `businessId`, `name`, `symbol`, `description`, `isActive`, `deletedAt`
+- Unique constraint: `(businessId, symbol)`
+
+**Product** - All pricing fields, relationships to Category and Unit, `ProductStatus` enum
+- Unique constraints: `(businessId, sku)`, `(businessId, barcode)`
+- Indexes: `businessId`, `businessId+categoryId`, `businessId+name`, `businessId+status`
+
+**ProductImage** - `id`, `productId`, `url`, `alt`, `isPrimary`, `sortOrder`
 
 ## Theme Support
 
@@ -249,13 +335,21 @@ cd frontend && npm run test
 # Run specific test suite
 npx vitest run src/components/dashboard/
 npx vitest run src/components/shared/
+npx vitest run src/features/products/
+npx vitest run src/features/categories/
+
+# Run backend tests
+cd backend && npm run test
 ```
 
 ### Test Coverage
 
 - Dashboard widgets: StatCard, ActivityCard, QuickActionCard
 - Shared components: DataTable, error pages
-- Auth forms: LoginForm, RegisterForm (pre-existing)
+- Auth forms: LoginForm, RegisterForm
+- Products: ProductForm validation, ProductList rendering
+- Categories: CategoryForm validation
+- Backend: PricingService calculations, ProductsService CRUD
 
 ## Available Scripts
 
@@ -358,9 +452,19 @@ Dashboard ← Navigate ← setAuth(store) ← API Response
 | Change own password | Yes | Yes | Yes |
 | **Business** | | | |
 | Full access | Yes | No | No |
-| **Products/Inventory** | | | |
-| Manage products | Yes | Yes | No |
+| **Categories** | | | |
+| Create/Edit categories | Yes | Yes | No |
+| Delete/Restore categories | Yes | No | No |
+| View categories | Yes | Yes | Yes |
+| **Units** | | | |
+| Create/Edit units | Yes | Yes | No |
+| Delete/Restore units | Yes | No | No |
+| View units | Yes | Yes | Yes |
+| **Products** | | | |
+| Create/Edit products | Yes | Yes | No |
+| Delete/Restore products | Yes | No | No |
 | View products | Yes | Yes | Yes |
+| Calculate pricing | Yes | Yes | Yes |
 | **Sales** | | | |
 | Process sales | Yes | Yes | Yes |
 | View reports | Yes | Yes | No |
