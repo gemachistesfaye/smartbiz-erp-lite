@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -22,6 +27,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -34,7 +43,7 @@ export class AuthService {
       businessId: user.businessId,
     };
 
-    const tokens = this.generateTokens(payload);
+    const tokens = await this.generateAndStoreTokens(payload);
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -49,7 +58,6 @@ export class AuthService {
         lastName: user.lastName,
         role: user.role,
         businessId: user.businessId,
-        business: user.business,
       },
       ...tokens,
     };
@@ -71,12 +79,25 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
+    const slug = dto.businessName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    const existingSlug = await this.prisma.business.findUnique({
+      where: { slug },
+    });
+
+    if (existingSlug) {
+      throw new ConflictException('Business name is already taken');
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     const business = await this.prisma.business.create({
       data: {
         name: dto.businessName,
-        slug: dto.businessName.toLowerCase().replace(/\s+/g, '-'),
+        slug,
         phone: dto.phone,
         settings: {
           create: {},
@@ -103,7 +124,7 @@ export class AuthService {
       businessId: user.businessId,
     };
 
-    const tokens = this.generateTokens(payload);
+    const tokens = await this.generateAndStoreTokens(payload);
 
     return {
       user: {
@@ -113,13 +134,107 @@ export class AuthService {
         lastName: user.lastName,
         role: user.role,
         businessId: user.businessId,
-        business: user.business,
       },
       ...tokens,
     };
   }
 
-  generateTokens(payload: { sub: string; email: string; role: string; businessId: string }) {
+  async refreshTokens(refreshToken: string) {
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: { include: { business: true } } },
+    });
+
+    if (!storedToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    const user = storedToken.user;
+
+    if (!user.isActive) {
+      await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
+    await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      businessId: user.businessId,
+    };
+
+    const tokens = await this.generateAndStoreTokens(payload);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        businessId: user.businessId,
+      },
+      ...tokens,
+    };
+  }
+
+  async logout(refreshToken: string) {
+    if (refreshToken) {
+      await this.prisma.refreshToken.deleteMany({
+        where: { token: refreshToken },
+      });
+    }
+    return { message: 'Logged out successfully' };
+  }
+
+  async logoutAll(userId: string) {
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+    return { message: 'Logged out from all devices' };
+  }
+
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { business: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      businessId: user.businessId,
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  private async generateAndStoreTokens(payload: {
+    sub: string;
+    email: string;
+    role: string;
+    businessId: string;
+  }) {
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '24h'),
     });
@@ -129,13 +244,17 @@ export class AuthService {
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
     });
 
-    return {
-      accessToken,
-      refreshToken,
-    };
-  }
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
 
-  verifyToken(token: string) {
-    return this.jwtService.verify(token);
+    await this.prisma.refreshToken.create({
+      data: {
+        userId: payload.sub,
+        token: refreshToken,
+        expiresAt,
+      },
+    });
+
+    return { accessToken, refreshToken };
   }
 }
