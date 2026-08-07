@@ -14,6 +14,7 @@ import { StockModule } from './modules/stock/stock.module';
 import { InventoryTransactionsModule } from './modules/inventory-transactions/inventory-transactions.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { ExpensesModule } from './modules/expenses/expenses.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { PrismaModule } from './prisma/prisma.module';
 import configuration from './config/configuration';
@@ -44,6 +45,7 @@ import configuration from './config/configuration';
     InventoryTransactionsModule,
     CustomersModule,
     SalesModule,
+    ExpensesModule,
     ReportsModule,
   ],
 })
