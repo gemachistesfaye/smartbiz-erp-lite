@@ -81,6 +81,9 @@ export const API_ENDPOINTS = {
     INVENTORY: '/reports/inventory',
     EXPENSES: '/reports/expenses',
     DASHBOARD: '/reports/dashboard',
+    OVERVIEW: '/reports/overview',
+    CUSTOMERS_CREDIT: '/reports/customers-credit',
+    PROFITABILITY: '/reports/profitability',
   },
   HEALTH: '/health',
 } as const;
