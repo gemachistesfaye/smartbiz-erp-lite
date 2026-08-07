@@ -109,7 +109,9 @@ apiClient.interceptors.response.use(
       error.response?.data?.message ||
       'An error occurred';
 
-    if (error.response?.status === 403) {
+    if (!error.response) {
+      toast.error('Unable to connect to server. Please check your connection and try again.');
+    } else if (error.response?.status === 403) {
       toast.error('You do not have permission to perform this action');
     } else if (error.response?.status === 404) {
       toast.error('Resource not found');

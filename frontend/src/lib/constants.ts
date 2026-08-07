@@ -58,6 +58,13 @@ export const API_ENDPOINTS = {
   CUSTOMERS: {
     BASE: '/customers',
     BY_ID: (id: string) => `/customers/${id}`,
+    RESTORE: (id: string) => `/customers/${id}/restore`,
+    STATS: '/customers/stats',
+    ACTIVE: '/customers/active',
+    OVERDUE: '/customers/overdue',
+    PAYMENTS: (id: string) => `/customers/${id}/payments`,
+    CREDIT_HISTORY: (id: string) => `/customers/${id}/credit-history`,
+    CAN_USE_CREDIT: (id: string, amount: number) => `/customers/${id}/can-use-credit?amount=${amount}`,
   },
   SALES: {
     BASE: '/sales',

@@ -259,3 +259,74 @@ export interface TransactionStats {
   monthTransactions: number;
   byType: Record<string, number>;
 }
+
+export interface Customer {
+  id: string;
+  businessId: string;
+  firstName: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  creditBalance: number;
+  creditLimit?: number;
+  status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+}
+
+export interface CustomerDetails extends Customer {
+  totalCredit: number;
+  totalPaid: number;
+  outstandingBalance: number;
+  availableCredit: number | null;
+  lastPaymentDate: string | null;
+}
+
+export interface CustomerStats {
+  total: number;
+  active: number;
+  inactive: number;
+  blocked: number;
+  withBalance: number;
+}
+
+export interface Payment {
+  id: string;
+  businessId: string;
+  customerId?: string;
+  saleId?: string;
+  type: 'INCOMING' | 'OUTGOING';
+  method: 'CASH' | 'MOBILE_MONEY' | 'CREDIT';
+  amount: number;
+  reference?: string;
+  notes?: string;
+  userId: string;
+  user?: { id: string; firstName: string; lastName: string };
+  createdAt: string;
+}
+
+export interface CreditHistoryActivity {
+  id: string;
+  type: 'CREDIT_SALE' | 'PAYMENT';
+  amount: number;
+  date: string;
+  description: string;
+  status?: string;
+  reference?: string;
+}
+
+export interface CreditHistory {
+  activities: CreditHistoryActivity[];
+  currentBalance: number;
+}
+
+export interface CreditCheck {
+  allowed: boolean;
+  currentBalance: number;
+  creditLimit: number | null;
+  availableCredit: number | null;
+  requestedAmount: number;
+}

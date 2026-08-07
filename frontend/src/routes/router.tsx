@@ -96,6 +96,11 @@ const CustomersPage = withSuspense(
     import('@/features/customers/pages/customers-page').then((m) => ({ default: m.CustomersPage })),
   ),
 );
+const CustomerDetailPage = withSuspense(
+  lazy(() =>
+    import('@/features/customers/pages/customer-detail-page').then((m) => ({ default: m.CustomerDetailPage })),
+  ),
+);
 const SalesPage = withSuspense(
   lazy(() =>
     import('@/features/sales/pages/sales-page').then((m) => ({ default: m.SalesPage })),
@@ -250,6 +255,12 @@ const customersRoute = createRoute({
   component: CustomersPage,
 });
 
+const customerDetailRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/customers/$customerId',
+  component: CustomerDetailPage,
+});
+
 const salesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: '/sales',
@@ -312,6 +323,7 @@ const routeTree = rootRoute.addChildren([
     receiveStockRoute,
     adjustStockRoute,
     customersRoute,
+    customerDetailRoute,
     salesRoute,
     expensesRoute,
     reportsRoute,

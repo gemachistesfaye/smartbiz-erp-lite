@@ -12,6 +12,7 @@ import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { StockModule } from './modules/stock/stock.module';
 import { InventoryTransactionsModule } from './modules/inventory-transactions/inventory-transactions.module';
+import { CustomersModule } from './modules/customers/customers.module';
 import { PrismaModule } from './prisma/prisma.module';
 import configuration from './config/configuration';
 
@@ -39,6 +40,7 @@ import configuration from './config/configuration';
     InventoryModule,
     StockModule,
     InventoryTransactionsModule,
+    CustomersModule,
   ],
 })
 export class AppModule {}
