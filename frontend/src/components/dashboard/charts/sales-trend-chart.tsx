@@ -8,17 +8,21 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const data = [
-  { name: 'Mon', sales: 4000, expenses: 2400 },
-  { name: 'Tue', sales: 3000, expenses: 1398 },
-  { name: 'Wed', sales: 5000, expenses: 3800 },
-  { name: 'Thu', sales: 2780, expenses: 3908 },
-  { name: 'Fri', sales: 1890, expenses: 4800 },
-  { name: 'Sat', sales: 6390, expenses: 3800 },
-  { name: 'Sun', sales: 3490, expenses: 4300 },
+interface SalesTrendChartProps {
+  data?: Array<{ name: string; sales: number; expenses: number }>;
+}
+
+const fallbackData = [
+  { name: 'Mon', sales: 0, expenses: 0 },
+  { name: 'Tue', sales: 0, expenses: 0 },
+  { name: 'Wed', sales: 0, expenses: 0 },
+  { name: 'Thu', sales: 0, expenses: 0 },
+  { name: 'Fri', sales: 0, expenses: 0 },
+  { name: 'Sat', sales: 0, expenses: 0 },
+  { name: 'Sun', sales: 0, expenses: 0 },
 ];
 
-export function SalesTrendChart() {
+export function SalesTrendChart({ data = fallbackData }: SalesTrendChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data}>

@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { useCurrentUser } from '@/features/auth/hooks/use-auth';
+import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { ChartCard } from '@/components/dashboard/chart-card';
 import { TableCard } from '@/components/dashboard/table-card';
@@ -11,97 +12,183 @@ import {
   InventoryDistributionChart,
 } from '@/components/dashboard/charts';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import {
   ShoppingCart,
   DollarSign,
   Package,
   AlertTriangle,
   CreditCard,
-  TrendingUp,
   Plus,
   UserPlus,
   PackagePlus,
   FileBarChart,
+  Users,
 } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 
-const kpiData = [
-  {
-    title: "Today's Sales",
-    value: formatCurrency(12450),
-    description: '18 transactions today',
-    icon: ShoppingCart,
-    trend: { value: 12, isPositive: true },
-  },
-  {
-    title: 'Monthly Revenue',
-    value: formatCurrency(245800),
-    description: 'July 2026',
-    icon: DollarSign,
-    trend: { value: 8, isPositive: true },
-  },
-  {
-    title: 'Inventory Value',
-    value: formatCurrency(892300),
-    description: 'Across 245 products',
-    icon: Package,
-    trend: { value: 3, isPositive: true },
-  },
-  {
-    title: 'Products',
-    value: '245',
-    description: '12 categories',
-    icon: TrendingUp,
-    trend: { value: 5, isPositive: true },
-  },
-  {
-    title: 'Low Stock Items',
-    value: '18',
-    description: 'Need restocking',
-    icon: AlertTriangle,
-    trend: { value: 2, isPositive: false },
-  },
-  {
-    title: 'Outstanding Credit',
-    value: formatCurrency(34200),
-    description: '8 customers',
-    icon: CreditCard,
-    trend: { value: 15, isPositive: false },
-  },
-];
+function KpiSkeleton() {
+  return (
+    <Card className="transition-shadow hover:shadow-md">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          <Skeleton className="h-11 w-11 rounded-lg" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-const recentSales = [
-  { id: '1', customer: 'Abebe Kebede', amount: 2450, time: '10 min ago', status: 'completed' },
-  { id: '2', customer: 'Fatuma Ahmed', amount: 1200, time: '25 min ago', status: 'completed' },
-  { id: '3', customer: 'Dawit Tesfaye', amount: 3800, time: '1 hr ago', status: 'pending' },
-  { id: '4', customer: 'Sara Mekonnen', amount: 890, time: '2 hr ago', status: 'completed' },
-  { id: '5', customer: 'Yonas Gebre', amount: 5600, time: '3 hr ago', status: 'completed' },
-];
+function TableSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <Skeleton className="h-4 w-4" />
+          <div className="flex-1 space-y-1">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <div className="text-right space-y-1">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-const topSellingProducts = [
-  { id: '1', name: 'Samsung Galaxy A54', category: 'Electronics', sold: 120, revenue: formatCurrency(180000) },
-  { id: '2', name: 'Injera Flour (25kg)', category: 'Groceries', sold: 98, revenue: formatCurrency(24500) },
-  { id: '3', name: 'Hawii Shirt', category: 'Clothing', sold: 86, revenue: formatCurrency(17200) },
-  { id: '4', name: 'Notebook Pack', category: 'Stationery', sold: 72, revenue: formatCurrency(3600) },
-  { id: '5', name: 'Ethiopian Coffee (1kg)', category: 'Groceries', sold: 65, revenue: formatCurrency(9750) },
-];
+function ChartSkeleton() {
+  return <Skeleton className="h-[300px] w-full" />;
+}
 
-const recentActivity = [
-  { id: '1', action: 'New sale recorded', target: 'ETB 2,450 - Abebe Kebede', time: '10 minutes ago', type: 'sale' as const },
-  { id: '2', action: 'Product added', target: 'Wireless Mouse', time: '30 minutes ago', type: 'product' as const },
-  { id: '3', action: 'Customer registered', target: 'Sara Mekonnen', time: '1 hour ago', type: 'customer' as const },
-  { id: '4', action: 'Stock received', target: 'Samsung Galaxy A54 (50 units)', time: '2 hours ago', type: 'stock' as const },
-  { id: '5', action: 'Expense recorded', target: 'Office Rent - ETB 15,000', time: '3 hours ago', type: 'expense' as const },
-  { id: '6', action: 'Sale completed', target: 'ETB 5,600 - Yonas Gebre', time: '4 hours ago', type: 'sale' as const },
-];
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <Package className="h-12 w-12 text-muted-foreground mb-4" />
+      <p className="text-muted-foreground">{message}</p>
+    </div>
+  );
+}
 
 export function DashboardPage() {
   const { user } = useAuthStore();
   const { data: currentUser } = useCurrentUser();
+  const { data, isLoading, error } = useDashboard();
   const navigate = useNavigate();
 
   const displayName = currentUser?.firstName || user?.firstName || 'User';
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Unable to load dashboard data. Please try again later.
+          </p>
+        </div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-destructive mb-2">Failed to load dashboard</p>
+            <p className="text-sm text-muted-foreground">
+              Check your connection and try refreshing the page.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const overview = data?.overview;
+
+  const kpiData = isLoading
+    ? []
+    : [
+        {
+          title: "Today's Sales",
+          value: formatCurrency(overview?.todaySales || 0),
+          description: `${overview?.todaySaleCount || 0} transactions today`,
+          icon: ShoppingCart,
+          trend: undefined as { value: number; isPositive: boolean } | undefined,
+        },
+        {
+          title: 'Monthly Revenue',
+          value: formatCurrency(overview?.monthlyRevenue || 0),
+          description: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+          icon: DollarSign,
+          trend: overview?.revenueTrend
+            ? { value: Math.abs(overview.revenueTrend), isPositive: overview.revenueTrend >= 0 }
+            : undefined,
+        },
+        {
+          title: 'Total Products',
+          value: String(overview?.totalProducts || 0),
+          description: 'Active products',
+          icon: Package,
+          trend: undefined,
+        },
+        {
+          title: 'Low Stock Items',
+          value: String(overview?.lowStockProducts || 0),
+          description: 'Need restocking',
+          icon: AlertTriangle,
+          trend: overview?.lowStockProducts
+            ? { value: overview.lowStockProducts, isPositive: false }
+            : undefined,
+        },
+        {
+          title: 'Total Customers',
+          value: String(overview?.totalCustomers || 0),
+          description: 'Registered customers',
+          icon: Users,
+          trend: undefined,
+        },
+        {
+          title: 'Outstanding Credit',
+          value: formatCurrency(overview?.outstandingCredit || 0),
+          description: data?.customerCreditSummary
+            ? `${data.customerCreditSummary.customerCount} customers`
+            : '0 customers',
+          icon: CreditCard,
+          trend: overview?.outstandingCredit
+            ? { value: 0, isPositive: false }
+            : undefined,
+        },
+      ];
+
+  const salesTrendData = data?.salesTrend?.map((d) => ({
+    name: d.day,
+    sales: d.sales,
+    expenses: d.expenses,
+  })) || [];
+
+  const monthlyRevenueData = (() => {
+    if (!data?.salesTrend?.length) return [];
+    const monthlyMap = new Map<string, number>();
+    data.salesTrend.forEach((d) => {
+      const monthKey = d.date.slice(0, 7);
+      monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + d.sales);
+    });
+    return Array.from(monthlyMap.entries()).map(([key, value]) => {
+      const [y, m] = key.split('-');
+      const monthName = new Date(Number(y), Number(m) - 1).toLocaleString('default', { month: 'short' });
+      return { name: monthName, revenue: value };
+    });
+  })();
+
+  const inventoryChartData = data?.inventorySummary?.map((c) => ({
+    name: c.name,
+    value: c.totalStock,
+  })) || [];
 
   return (
     <div className="space-y-6">
@@ -115,16 +202,18 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {kpiData.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
-            trend={stat.trend}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => <KpiSkeleton key={i} />)
+          : kpiData.map((stat) => (
+              <StatCard
+                key={stat.title}
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                icon={stat.icon}
+                trend={stat.trend}
+              />
+            ))}
       </div>
 
       <div>
@@ -158,14 +247,14 @@ export function DashboardPage() {
           title="Sales Trend"
           description="Daily sales vs expenses this week"
         >
-          <SalesTrendChart />
+          {isLoading ? <ChartSkeleton /> : <SalesTrendChart data={salesTrendData} />}
         </ChartCard>
 
         <ChartCard
           title="Monthly Revenue"
-          description="Revenue over the last 7 months"
+          description="Revenue over recent months"
         >
-          <RevenueChart />
+          {isLoading ? <ChartSkeleton /> : <RevenueChart data={monthlyRevenueData} />}
         </ChartCard>
       </div>
 
@@ -174,7 +263,13 @@ export function DashboardPage() {
           title="Inventory Distribution"
           description="By category"
         >
-          <InventoryDistributionChart />
+          {isLoading ? (
+            <ChartSkeleton />
+          ) : inventoryChartData.length === 0 ? (
+            <EmptyState message="No inventory data yet. Add products to see distribution." />
+          ) : (
+            <InventoryDistributionChart data={inventoryChartData} />
+          )}
         </ChartCard>
 
         <TableCard
@@ -182,23 +277,29 @@ export function DashboardPage() {
           description="Best performers this month"
           viewAllLink="/products"
         >
-          <div className="space-y-3">
-            {topSellingProducts.map((product, index) => (
-              <div key={product.id} className="flex items-center gap-3">
-                <span className="text-sm font-medium text-muted-foreground w-5">
-                  {index + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{product.name}</p>
-                  <p className="text-xs text-muted-foreground">{product.category}</p>
+          {isLoading ? (
+            <TableSkeleton />
+          ) : !data?.topSellingProducts?.length ? (
+            <EmptyState message="No sales yet. Complete your first sale to see top products." />
+          ) : (
+            <div className="space-y-3">
+              {data.topSellingProducts.map((product, index) => (
+                <div key={product.id} className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-muted-foreground w-5">
+                    {index + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{product.name}</p>
+                    <p className="text-xs text-muted-foreground">{product.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{formatCurrency(product.revenue)}</p>
+                    <p className="text-xs text-muted-foreground">{product.quantitySold} sold</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{product.revenue}</p>
-                  <p className="text-xs text-muted-foreground">{product.sold} sold</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </TableCard>
       </div>
 
@@ -208,32 +309,50 @@ export function DashboardPage() {
           description="Latest transactions"
           viewAllLink="/sales"
         >
-          <div className="space-y-3">
-            {recentSales.map((sale) => (
-              <div key={sale.id} className="flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{sale.customer}</p>
-                  <p className="text-xs text-muted-foreground">{sale.time}</p>
+          {isLoading ? (
+            <TableSkeleton />
+          ) : !data?.recentSales?.length ? (
+            <EmptyState message="No sales yet. Start by creating your first sale." />
+          ) : (
+            <div className="space-y-3">
+              {data.recentSales.map((sale) => (
+                <div
+                  key={sale.id}
+                  className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 rounded-md p-1 -m-1 transition-colors"
+                  onClick={() => navigate({ to: '/sales/$saleId', params: { saleId: sale.id } })}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{sale.customer}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(sale.createdAt)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{formatCurrency(sale.amount)}</p>
+                    <Badge
+                      variant={sale.status === 'COMPLETED' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {sale.status.toLowerCase()}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{formatCurrency(sale.amount)}</p>
-                  <Badge
-                    variant={sale.status === 'completed' ? 'default' : 'secondary'}
-                    className="text-xs"
-                  >
-                    {sale.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </TableCard>
 
         <TableCard
           title="Recent Activity"
           description="Latest actions in your store"
         >
-          <ActivityCard activities={recentActivity} />
+          {isLoading ? (
+            <TableSkeleton />
+          ) : !data?.activityFeed?.length ? (
+            <EmptyState message="No recent activity. Start using the system to see activity here." />
+          ) : (
+            <ActivityCard activities={data.activityFeed} />
+          )}
         </TableCard>
       </div>
     </div>

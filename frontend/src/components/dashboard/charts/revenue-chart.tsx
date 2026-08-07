@@ -8,17 +8,21 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const data = [
-  { name: 'Jan', revenue: 4000 },
-  { name: 'Feb', revenue: 3000 },
-  { name: 'Mar', revenue: 5000 },
-  { name: 'Apr', revenue: 4780 },
-  { name: 'May', revenue: 5890 },
-  { name: 'Jun', revenue: 6390 },
-  { name: 'Jul', revenue: 5490 },
+interface RevenueChartProps {
+  data?: Array<{ name: string; revenue: number }>;
+}
+
+const fallbackData = [
+  { name: 'Jan', revenue: 0 },
+  { name: 'Feb', revenue: 0 },
+  { name: 'Mar', revenue: 0 },
+  { name: 'Apr', revenue: 0 },
+  { name: 'May', revenue: 0 },
+  { name: 'Jun', revenue: 0 },
+  { name: 'Jul', revenue: 0 },
 ];
 
-export function RevenueChart() {
+export function RevenueChart({ data = fallbackData }: RevenueChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data}>

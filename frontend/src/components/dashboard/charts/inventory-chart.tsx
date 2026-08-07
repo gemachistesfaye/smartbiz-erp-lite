@@ -1,16 +1,16 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const data = [
-  { name: 'Electronics', value: 4000 },
-  { name: 'Groceries', value: 3000 },
-  { name: 'Clothing', value: 2000 },
-  { name: 'Stationery', value: 1500 },
-  { name: 'Other', value: 500 },
+interface InventoryChartProps {
+  data?: Array<{ name: string; value: number }>;
+}
+
+const fallbackData = [
+  { name: 'No Data', value: 1 },
 ];
 
 const COLORS = ['#0D8ABC', '#F59E0B', '#10B981', '#8B5CF6', '#EF4444'];
 
-export function InventoryDistributionChart() {
+export function InventoryDistributionChart({ data = fallbackData }: InventoryChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
