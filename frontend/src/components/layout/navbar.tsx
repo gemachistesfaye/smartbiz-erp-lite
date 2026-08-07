@@ -12,12 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/hooks/use-theme';
 import { useOnlineStatus } from '@/hooks/use-online-status';
@@ -41,7 +36,7 @@ export function Navbar() {
   return (
     <TooltipProvider>
       <header
-        className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6"
+        className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-5"
         role="banner"
       >
         {/* Mobile menu button */}
@@ -68,7 +63,7 @@ export function Navbar() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
           {/* Online/Offline Status */}
           <Badge variant={isOnline ? 'default' : 'destructive'} className="hidden sm:inline-flex">
             {isOnline ? 'Online' : 'Offline'}
@@ -97,50 +92,60 @@ export function Navbar() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 px-2" aria-label="User menu">
+              <button
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="User menu"
+              >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.email ? `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=0D8ABC&color=fff` : undefined} alt={user ? `${user.firstName} ${user.lastName}` : 'User'} />
+                  <AvatarImage
+                    src={
+                      user?.email
+                        ? `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=0D8ABC&color=fff`
+                        : undefined
+                    }
+                    alt={user ? `${user.firstName} ${user.lastName}` : 'User'}
+                  />
                   <AvatarFallback>{userInitials}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium leading-tight">
                     {user ? `${user.firstName} ${user.lastName}` : 'User'}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground leading-tight">
                     {user?.role ? ROLE_LABELS[user.role] : 'Role'}
                   </span>
                 </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
-              </Button>
+                <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block shrink-0" />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">
+            <DropdownMenuContent align="end" sideOffset={8} className="w-[280px] p-1.5">
+              <DropdownMenuLabel className="px-3 py-2.5">
+                <div className="flex flex-col space-y-0.5">
+                  <p className="text-sm font-medium leading-tight">
                     {user ? `${user.firstName} ${user.lastName}` : 'User'}
                   </p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground leading-tight">{user?.email}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="flex items-center">
-                  <User className="mr-2 h-4 w-4" />
+              <DropdownMenuItem asChild className="px-3 py-2 cursor-pointer">
+                <Link to="/profile" className="flex items-center gap-2.5">
+                  <User className="h-4 w-4 shrink-0" />
                   Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/settings" className="flex items-center">
-                  <Settings className="mr-2 h-4 w-4" />
+              <DropdownMenuItem asChild className="px-3 py-2 cursor-pointer">
+                <Link to="/settings" className="flex items-center gap-2.5">
+                  <Settings className="h-4 w-4 shrink-0" />
                   Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => logout.mutate()}
-                className="text-destructive focus:text-destructive"
+                className="px-3 py-2 text-destructive focus:text-destructive cursor-pointer"
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-2.5 h-4 w-4 shrink-0" />
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

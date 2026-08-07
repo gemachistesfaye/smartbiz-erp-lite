@@ -1,4 +1,4 @@
-import { Outlet, Link } from '@tanstack/react-router';
+import { Outlet, Link, useLocation } from '@tanstack/react-router';
 import { ChevronRight, Home } from 'lucide-react';
 import { Sidebar } from './sidebar';
 import { Navbar } from './navbar';
@@ -10,6 +10,7 @@ const routeLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   products: 'Products',
   categories: 'Categories',
+  units: 'Units',
   inventory: 'Inventory',
   customers: 'Customers',
   sales: 'Sales',
@@ -17,25 +18,32 @@ const routeLabels: Record<string, string> = {
   reports: 'Reports',
   settings: 'Settings',
   profile: 'Profile',
+  suppliers: 'Suppliers',
 };
 
 function Breadcrumbs() {
-  const currentPath = window.location.pathname;
-  const segments = currentPath.split('/').filter(Boolean);
-  const currentSegment = segments[segments.length - 1];
-  const label = currentSegment ? routeLabels[currentSegment] || currentSegment : 'Dashboard';
+  const location = useLocation();
+  const segments = location.pathname.split('/').filter(Boolean);
 
-  if (currentSegment === 'dashboard' || segments.length === 0) {
+  const label = segments
+    .slice()
+    .reverse()
+    .find((seg) => routeLabels[seg]);
+
+  if (!label || label === 'dashboard') {
     return null;
   }
 
   return (
-    <nav className="flex items-center space-x-1 text-sm text-muted-foreground mb-4" aria-label="Breadcrumb">
+    <nav
+      className="flex items-center space-x-1 text-sm text-muted-foreground mb-4"
+      aria-label="Breadcrumb"
+    >
       <Link to="/dashboard" className="flex items-center hover:text-foreground transition-colors">
         <Home className="h-4 w-4" />
       </Link>
       <ChevronRight className="h-4 w-4" />
-      <span className="font-medium text-foreground">{label}</span>
+      <span className="font-medium text-foreground">{routeLabels[label]}</span>
     </nav>
   );
 }
