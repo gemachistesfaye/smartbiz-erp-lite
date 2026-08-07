@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Menu, Moon, Sun, Bell, Search, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, Moon, Sun, Bell, Search, LogOut, User, ChevronDown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,6 +28,7 @@ export function Navbar() {
   const { user } = useAuthStore();
   const logout = useLogout();
   const [searchQuery, setSearchQuery] = useState('');
+  const isOwner = user?.role === 'OWNER';
 
   const userInitials = user
     ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
@@ -137,6 +138,14 @@ export function Navbar() {
                   Profile
                 </Link>
               </DropdownMenuItem>
+              {isOwner && (
+                <DropdownMenuItem asChild className="px-3 py-2 cursor-pointer">
+                  <Link to="/users" className="flex items-center gap-2.5">
+                    <ShieldCheck className="h-4 w-4 shrink-0" />
+                    Users
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => logout.mutate()}

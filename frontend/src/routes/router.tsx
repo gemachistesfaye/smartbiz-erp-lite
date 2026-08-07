@@ -153,6 +153,9 @@ const ProfilePage = withSuspense(
 const HelpPage = withSuspense(
   lazy(() => import('@/features/help/pages/help-page').then((m) => ({ default: m.HelpPage }))),
 );
+const UsersPage = withSuspense(
+  lazy(() => import('@/features/users/pages/users-page').then((m) => ({ default: m.UsersPage }))),
+);
 const NotFoundPage = withSuspense(
   lazy(() =>
     import('@/components/shared/not-found-page').then((m) => ({ default: m.NotFoundPage })),
@@ -334,6 +337,12 @@ const helpRoute = createRoute({
   component: HelpPage,
 });
 
+const usersRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/users',
+  component: UsersPage,
+});
+
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -374,6 +383,7 @@ const routeTree = rootRoute.addChildren([
     reportsRoute,
     settingsRoute,
     profileRoute,
+    usersRoute,
     helpRoute,
   ]),
   notFoundRoute,

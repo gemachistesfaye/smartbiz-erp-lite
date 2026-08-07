@@ -17,11 +17,13 @@ import {
   Truck,
   SlidersHorizontal,
   Banknote,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useUIStore } from '@/stores/ui-store';
+import { useAuthStore } from '@/features/auth/store/auth-store';
 
 const navSections = [
   {
@@ -61,9 +63,15 @@ const bottomNavigation = [
   { name: 'Help & Support', href: '/help', icon: HelpCircle },
 ];
 
+const adminNavigation = [
+  { name: 'Users', href: '/users', icon: ShieldCheck },
+];
+
 export function Sidebar() {
   const matchRoute = useMatchRoute();
   const { sidebarOpen, setSidebarOpen, sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { user } = useAuthStore();
+  const isOwner = user?.role === 'OWNER';
 
   return (
     <>
@@ -155,6 +163,28 @@ export function Sidebar() {
         {/* Bottom System Area */}
         <div className="mt-auto shrink-0 p-2">
           <Separator className="mb-2" />
+          {isOwner && adminNavigation.map((item) => {
+            const isActive = matchRoute({ to: item.href });
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                role="menuitem"
+                className={cn(
+                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  sidebarCollapsed && 'justify-center px-2',
+                )}
+                onClick={() => setSidebarOpen(false)}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {!sidebarCollapsed && <span>{item.name}</span>}
+              </Link>
+            );
+          })}
           {bottomNavigation.map((item) => {
             const isActive = matchRoute({ to: item.href });
             return (
