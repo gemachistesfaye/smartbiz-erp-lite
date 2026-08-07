@@ -76,6 +76,10 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/expenses/${id}`,
     CATEGORIES: '/expense-categories',
   },
+  SETTINGS: {
+    BASE: '/settings',
+    BUSINESS: '/settings/business',
+  },
   REPORTS: {
     SALES: '/reports/sales',
     INVENTORY: '/reports/inventory',
