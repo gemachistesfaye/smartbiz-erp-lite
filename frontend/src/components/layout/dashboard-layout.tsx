@@ -20,6 +20,7 @@ const routeLabels: Record<string, string> = {
   profile: 'Profile',
   suppliers: 'Suppliers',
   help: 'Help & Support',
+  pos: 'Point of Sale',
 };
 
 function Breadcrumbs() {

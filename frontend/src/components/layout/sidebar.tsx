@@ -16,6 +16,7 @@ import {
   Store,
   Truck,
   SlidersHorizontal,
+  Banknote,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,10 @@ import { useUIStore } from '@/stores/ui-store';
 const navSections = [
   {
     label: null,
-    items: [{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'POS', href: '/pos', icon: Banknote },
+    ],
   },
   {
     label: 'Catalog',

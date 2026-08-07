@@ -111,8 +111,24 @@ const CustomerDetailPage = withSuspense(
     })),
   ),
 );
-const SalesPage = withSuspense(
-  lazy(() => import('@/features/sales/pages/sales-page').then((m) => ({ default: m.SalesPage }))),
+const SalesHistoryPage = withSuspense(
+  lazy(() =>
+    import('@/features/sales/pages/sales-history-page').then((m) => ({
+      default: m.SalesHistoryPage,
+    })),
+  ),
+);
+const SaleDetailPage = withSuspense(
+  lazy(() =>
+    import('@/features/sales/pages/sale-detail-page').then((m) => ({
+      default: m.SaleDetailPage,
+    })),
+  ),
+);
+const POSPage = withSuspense(
+  lazy(() =>
+    import('@/features/sales/pages/pos-page').then((m) => ({ default: m.PosPage })),
+  ),
 );
 const ExpensesPage = withSuspense(
   lazy(() =>
@@ -273,7 +289,19 @@ const customerDetailRoute = createRoute({
 const salesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: '/sales',
-  component: SalesPage,
+  component: SalesHistoryPage,
+});
+
+const saleDetailRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/sales/$saleId',
+  component: SaleDetailPage,
+});
+
+const posRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/pos',
+  component: POSPage,
 });
 
 const expensesRoute = createRoute({
@@ -340,6 +368,8 @@ const routeTree = rootRoute.addChildren([
     customersRoute,
     customerDetailRoute,
     salesRoute,
+    saleDetailRoute,
+    posRoute,
     expensesRoute,
     reportsRoute,
     settingsRoute,

@@ -69,7 +69,7 @@ export const API_ENDPOINTS = {
   SALES: {
     BASE: '/sales',
     BY_ID: (id: string) => `/sales/${id}`,
-    CHECKOUT: '/sales/checkout',
+    CANCEL: (id: string) => `/sales/${id}/cancel`,
   },
   EXPENSES: {
     BASE: '/expenses',

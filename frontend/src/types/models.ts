@@ -330,3 +330,43 @@ export interface CreditCheck {
   availableCredit: number | null;
   requestedAmount: number;
 }
+
+export interface SaleItem {
+  id: string;
+  saleId: string;
+  productId: string;
+  product?: { id: string; name: string; sku?: string; unit?: { symbol: string } };
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface Sale {
+  id: string;
+  saleNumber: string;
+  businessId: string;
+  cashierId: string;
+  cashier?: { id: string; firstName: string; lastName: string };
+  customerId?: string;
+  customer?: { id: string; firstName: string; lastName?: string; phone?: string };
+  paymentMethod: 'CASH' | 'MOBILE_MONEY' | 'CREDIT';
+  subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  amountTendered?: number;
+  changeAmount?: number;
+  status: 'COMPLETED' | 'VOIDED' | 'REFUNDED';
+  notes?: string;
+  items: SaleItem[];
+  payments?: Payment[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SaleStats {
+  totalSales: number;
+  totalRevenue: number;
+  todaySales: number;
+  todayRevenue: number;
+}
