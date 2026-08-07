@@ -163,6 +163,12 @@ export function Sidebar() {
         {/* Bottom System Area */}
         <div className="mt-auto shrink-0 p-2">
           <Separator className="mb-2" />
+          {!sidebarCollapsed && (
+            <p className="px-3 pt-2 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+              System
+            </p>
+          )}
+          {sidebarCollapsed && <div className="my-2 h-px bg-border" />}
           {isOwner && adminNavigation.map((item) => {
             const isActive = matchRoute({ to: item.href });
             return (
