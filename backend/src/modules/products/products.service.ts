@@ -154,6 +154,8 @@ export class ProductsService {
         categoryId: dto.categoryId,
         unitId: dto.unitId,
         description: dto.description,
+        batchNumber: dto.batchNumber || null,
+        expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
         buyingPrice: dto.buyingPrice || 0,
         quantityPurchased: dto.quantityPurchased || 1,
         transportationCost: dto.transportationCost || 0,
@@ -227,6 +229,8 @@ export class ProductsService {
     if (dto.categoryId !== undefined) updateData.categoryId = dto.categoryId;
     if (dto.unitId !== undefined) updateData.unitId = dto.unitId;
     if (dto.description !== undefined) updateData.description = dto.description;
+    if (dto.batchNumber !== undefined) updateData.batchNumber = dto.batchNumber || null;
+    if (dto.expiryDate !== undefined) updateData.expiryDate = dto.expiryDate ? new Date(dto.expiryDate) : null;
     if (dto.buyingPrice !== undefined) updateData.buyingPrice = dto.buyingPrice;
     if (dto.quantityPurchased !== undefined) updateData.quantityPurchased = dto.quantityPurchased;
     if (dto.transportationCost !== undefined) updateData.transportationCost = dto.transportationCost;

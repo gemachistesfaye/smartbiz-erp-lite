@@ -22,6 +22,8 @@ const productSchema = z.object({
   categoryId: z.string().optional(),
   unitId: z.string().optional(),
   description: z.string().optional(),
+  batchNumber: z.string().max(50).optional(),
+  expiryDate: z.string().optional(),
   buyingPrice: z.number().min(0).optional(),
   quantityPurchased: z.number().min(1).optional(),
   transportationCost: z.number().min(0).optional(),
@@ -74,6 +76,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       categoryId: product?.categoryId || '',
       unitId: product?.unitId || '',
       description: product?.description || '',
+      batchNumber: product?.batchNumber || '',
+      expiryDate: product?.expiryDate ? product.expiryDate.slice(0, 10) : '',
       buyingPrice: product?.buyingPrice || 0,
       quantityPurchased: product?.quantityPurchased || 1,
       transportationCost: product?.transportationCost || 0,
@@ -219,6 +223,18 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Input id="description" placeholder="Optional product description" {...register('description')} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="batchNumber">Batch Number</Label>
+              <Input id="batchNumber" placeholder="e.g. BATCH-001" {...register('batchNumber')} />
+              <p className="text-xs text-muted-foreground">Optional batch/lot tracking</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="expiryDate">Expiry Date</Label>
+              <Input id="expiryDate" type="date" {...register('expiryDate')} />
+              <p className="text-xs text-muted-foreground">Product expiration date</p>
+            </div>
           </div>
         </CardContent>
       </Card>

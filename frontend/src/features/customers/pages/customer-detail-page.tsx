@@ -167,11 +167,12 @@ export function CustomerDetailPage() {
               <div className="rounded-lg bg-muted p-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <TrendingUp className="h-4 w-4" />
-                  Total Credit
+                  Total Purchases
                 </div>
                 <p className="mt-1 text-lg font-bold">
-                  Br {customer.totalCredit.toLocaleString()}
+                  Br {customer.totalPurchaseAmount.toLocaleString()}
                 </p>
+                <p className="text-xs text-muted-foreground">{customer.totalPurchases} transaction{customer.totalPurchases !== 1 ? 's' : ''}</p>
               </div>
               <div className="rounded-lg bg-muted p-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -190,6 +191,14 @@ export function CustomerDetailPage() {
                   <span className={`font-medium ${customer.availableCredit <= 0 ? 'text-destructive' : 'text-green-600'}`}>
                     Br {customer.availableCredit.toLocaleString()}
                   </span>
+                </div>
+              </div>
+            )}
+            {customer.lastPurchaseDate && (
+              <div className="pt-2 border-t">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Last Purchase</span>
+                  <span className="font-medium">{formatDate(customer.lastPurchaseDate)}</span>
                 </div>
               </div>
             )}

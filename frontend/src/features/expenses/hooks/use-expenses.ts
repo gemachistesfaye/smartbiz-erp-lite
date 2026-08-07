@@ -16,6 +16,7 @@ export interface ExpenseCategory {
 export interface Expense {
   id: string;
   businessId: string;
+  expenseNumber: string;
   categoryId: string;
   amount: number;
   description: string;

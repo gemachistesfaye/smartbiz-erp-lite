@@ -231,6 +231,8 @@ model Product {
   barcode       String?  @db.VarChar(100)
   brand         String?  @db.VarChar(100)
   description   String?  @db.Text
+  batchNumber   String?  @db.VarChar(50)
+  expiryDate    DateTime?
 
   buyingPrice        Decimal @default(0) @db.Decimal(12, 2)
   quantityPurchased  Int     @default(1)
@@ -497,6 +499,7 @@ model Sale {
   cashier         User          @relation(fields: [cashierId], references: [id], onDelete: Restrict)
   customerId      String?
   customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  saleNumber      String        @db.VarChar(30)
   paymentMethod   PaymentMethod
   subtotal        Decimal       @db.Decimal(12, 2)
   taxAmount       Decimal       @default(0) @db.Decimal(12, 2)
@@ -513,6 +516,7 @@ model Sale {
   items   SaleItem[]
   payments Payment[]
 
+  @@unique([businessId, saleNumber])
   @@index([businessId])
   @@index([cashierId])
   @@index([customerId])
@@ -580,6 +584,7 @@ model Expense {
   id            String   @id @default(uuid())
   businessId    String
   business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  expenseNumber String   @db.VarChar(30)
   categoryId    String
   category      ExpenseCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   amount        Decimal  @db.Decimal(12, 2)
@@ -592,7 +597,9 @@ model Expense {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
 
+  @@unique([businessId, expenseNumber])
   @@index([businessId])
   @@index([businessId, date])
   @@index([businessId, categoryId])
@@ -662,6 +669,8 @@ model BusinessSettings {
   currency           String  @default("ETB") @db.VarChar(3)
   currencySymbol     String  @default("Br") @db.VarChar(5)
   lowStockThreshold  Int     @default(5)
+  tinNumber          String? @db.VarChar(20)
+  vatNumber          String? @db.VarChar(20)
   receiptHeader      String? @db.Text
   receiptFooter      String? @db.Text
 

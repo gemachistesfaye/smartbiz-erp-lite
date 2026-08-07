@@ -93,7 +93,7 @@ export class CustomersService {
   async getCustomerDetails(id: string, businessId: string) {
     const customer = await this.findById(id, businessId);
 
-    const [totalCreditResult, totalPaidResult, lastPayment] = await Promise.all([
+    const [totalCreditResult, totalPaidResult, lastPayment, purchaseStats, lastSale] = await Promise.all([
       this.prisma.sale.aggregate({
         where: {
           customerId: id,
@@ -119,6 +119,24 @@ export class CustomersService {
         orderBy: { createdAt: 'desc' },
         select: { createdAt: true },
       }),
+      this.prisma.sale.aggregate({
+        where: {
+          customerId: id,
+          businessId,
+          status: 'COMPLETED',
+        },
+        _sum: { totalAmount: true },
+        _count: true,
+      }),
+      this.prisma.sale.findFirst({
+        where: {
+          customerId: id,
+          businessId,
+          status: 'COMPLETED',
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
     ]);
 
     const totalCredit = Number(totalCreditResult._sum.totalAmount || 0);
@@ -134,6 +152,9 @@ export class CustomersService {
       outstandingBalance,
       availableCredit,
       lastPaymentDate: lastPayment?.createdAt || null,
+      totalPurchases: purchaseStats._count,
+      totalPurchaseAmount: Number(purchaseStats._sum.totalAmount || 0),
+      lastPurchaseDate: lastSale?.createdAt || null,
     };
   }
 

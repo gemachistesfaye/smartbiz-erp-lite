@@ -91,6 +91,7 @@ export class SalesService {
           businessId,
           cashierId: userId,
           customerId: dto.customerId || null,
+          saleNumber,
           paymentMethod: dto.paymentMethod,
           subtotal,
           taxAmount: 0,
@@ -308,19 +309,7 @@ export class SalesService {
       throw new NotFoundException('Sale not found');
     }
 
-    const saleDate = new Date(sale.createdAt);
-    const dateStr = saleDate.toISOString().slice(0, 10).replace(/-/g, '');
-    const dayStart = new Date(saleDate.getFullYear(), saleDate.getMonth(), saleDate.getDate());
-    const salesBeforeOrEqual = await this.prisma.sale.count({
-      where: {
-        businessId,
-        createdAt: { gte: dayStart, lte: saleDate },
-      },
-    });
-    const seq = salesBeforeOrEqual.toString().padStart(4, '0');
-    const saleNumber = `SB-${dateStr}-${seq}`;
-
-    return { ...sale, saleNumber };
+    return sale;
   }
 
   async cancelSale(id: string, businessId: string, userId: string) {

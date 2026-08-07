@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsNumber,
   IsEnum,
+  IsDateString,
   Min,
   MaxLength,
 } from 'class-validator';
@@ -47,6 +48,17 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 'BATCH-001' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  batchNumber?: string;
+
+  @ApiPropertyOptional({ example: '2027-05-20' })
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
 
   @ApiPropertyOptional({ example: 5000 })
   @IsOptional()
@@ -182,6 +194,17 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 'BATCH-001' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  batchNumber?: string;
+
+  @ApiPropertyOptional({ example: '2027-05-20' })
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
 
   @ApiPropertyOptional({ example: 5000 })
   @IsOptional()

@@ -10,6 +10,8 @@ export interface BusinessSettings {
   currency: string;
   currencySymbol: string;
   lowStockThreshold: number;
+  tinNumber: string | null;
+  vatNumber: string | null;
   receiptHeader: string | null;
   receiptFooter: string | null;
   createdAt: string;

@@ -50,6 +50,8 @@ export class SettingsService {
     if (dto.currencySymbol !== undefined) updateData.currencySymbol = dto.currencySymbol;
     if (dto.taxRate !== undefined) updateData.taxRate = dto.taxRate;
     if (dto.lowStockThreshold !== undefined) updateData.lowStockThreshold = dto.lowStockThreshold;
+    if (dto.tinNumber !== undefined) updateData.tinNumber = dto.tinNumber || null;
+    if (dto.vatNumber !== undefined) updateData.vatNumber = dto.vatNumber || null;
     if (dto.receiptHeader !== undefined) updateData.receiptHeader = dto.receiptHeader || null;
     if (dto.receiptFooter !== undefined) updateData.receiptFooter = dto.receiptFooter || null;
 

@@ -27,6 +27,18 @@ export class UpdateSettingsDto {
   @Min(0)
   lowStockThreshold?: number;
 
+  @ApiPropertyOptional({ example: '0012345678' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  tinNumber?: string;
+
+  @ApiPropertyOptional({ example: 'VAT-0012345' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  vatNumber?: string;
+
   @ApiPropertyOptional({ example: 'SmartBiz Store' })
   @IsOptional()
   @IsString()

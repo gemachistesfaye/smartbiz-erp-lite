@@ -23,6 +23,8 @@ const settingsSchema = z.object({
   currencySymbol: z.string().min(1, 'Symbol is required').max(5),
   taxRate: z.coerce.number().min(0, 'Tax rate must be non-negative').max(100, 'Tax rate cannot exceed 100%'),
   lowStockThreshold: z.coerce.number().min(0, 'Must be non-negative').int(),
+  tinNumber: z.string().max(20).optional().or(z.literal('')),
+  vatNumber: z.string().max(20).optional().or(z.literal('')),
   receiptHeader: z.string().max(500).optional().or(z.literal('')),
   receiptFooter: z.string().max(500).optional().or(z.literal('')),
 });
@@ -83,6 +85,8 @@ export function SettingsPage() {
         currencySymbol: settings.currencySymbol || 'Br',
         taxRate: settings.taxRate || 0,
         lowStockThreshold: settings.lowStockThreshold || 5,
+        tinNumber: settings.tinNumber || '',
+        vatNumber: settings.vatNumber || '',
         receiptHeader: settings.receiptHeader || '',
         receiptFooter: settings.receiptFooter || '',
       });
@@ -105,6 +109,8 @@ export function SettingsPage() {
       currencySymbol: data.currencySymbol,
       taxRate: data.taxRate,
       lowStockThreshold: data.lowStockThreshold,
+      tinNumber: data.tinNumber || undefined,
+      vatNumber: data.vatNumber || undefined,
       receiptHeader: data.receiptHeader || undefined,
       receiptFooter: data.receiptFooter || undefined,
     });
@@ -183,6 +189,18 @@ export function SettingsPage() {
               <Label htmlFor="lowStockThreshold">Low Stock Threshold</Label>
               <Input id="lowStockThreshold" type="number" min="0" placeholder="5" {...register('lowStockThreshold')} />
               <p className="text-xs text-muted-foreground">Default alert threshold for low stock notifications</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tinNumber">TIN Number</Label>
+                <Input id="tinNumber" placeholder="e.g. 0012345678" maxLength={20} {...register('tinNumber')} />
+                <p className="text-xs text-muted-foreground">Tax Identification Number</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vatNumber">VAT Number</Label>
+                <Input id="vatNumber" placeholder="e.g. VAT-0012345" maxLength={20} {...register('vatNumber')} />
+                <p className="text-xs text-muted-foreground">Value Added Tax registration number</p>
+              </div>
             </div>
           </CardContent>
         </Card>

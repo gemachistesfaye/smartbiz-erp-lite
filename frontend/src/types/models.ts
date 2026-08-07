@@ -72,6 +72,8 @@ export interface Product {
   barcode?: string;
   brand?: string;
   description?: string;
+  batchNumber?: string;
+  expiryDate?: string;
   buyingPrice: number;
   quantityPurchased: number;
   transportationCost: number;
@@ -283,6 +285,9 @@ export interface CustomerDetails extends Customer {
   outstandingBalance: number;
   availableCredit: number | null;
   lastPaymentDate: string | null;
+  totalPurchases: number;
+  totalPurchaseAmount: number;
+  lastPurchaseDate: string | null;
 }
 
 export interface CustomerStats {

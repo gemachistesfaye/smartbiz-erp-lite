@@ -156,6 +156,7 @@ export function ExpensesList() {
           <table className="w-full caption-bottom text-sm">
             <thead className="border-b">
               <tr>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Ref #</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Category</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Description</th>
@@ -169,18 +170,19 @@ export function ExpensesList() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b">
-                    <td colSpan={7} className="p-4"><div className="h-8 bg-muted animate-pulse rounded" /></td>
+                    <td colSpan={8} className="p-4"><div className="h-8 bg-muted animate-pulse rounded" /></td>
                   </tr>
                 ))
               ) : expenses.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="h-24 text-center text-muted-foreground">
+                  <td colSpan={8} className="h-24 text-center text-muted-foreground">
                     No expenses found.
                   </td>
                 </tr>
               ) : (
                 expenses.map((expense) => (
                   <tr key={expense.id} className="border-b transition-colors hover:bg-muted/50">
+                    <td className="p-4 font-mono text-xs text-muted-foreground">{expense.expenseNumber}</td>
                     <td className="p-4 text-muted-foreground">{formatDate(expense.date)}</td>
                     <td className="p-4">
                       <Badge variant="outline">{expense.category.name}</Badge>

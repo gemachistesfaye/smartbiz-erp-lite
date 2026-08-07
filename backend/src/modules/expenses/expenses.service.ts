@@ -106,12 +106,13 @@ export class ExpensesService {
     const limit = query.limit || 20;
     const skip = (page - 1) * limit;
 
-    const where: any = { businessId };
+    const where: any = { businessId, deletedAt: null };
 
     if (query.search) {
       where.OR = [
         { description: { contains: query.search, mode: 'insensitive' } },
         { category: { name: { contains: query.search, mode: 'insensitive' } } },
+        { expenseNumber: { contains: query.search, mode: 'insensitive' } },
       ];
     }
 
@@ -151,7 +152,7 @@ export class ExpensesService {
     ]);
 
     const totalAmount = await this.prisma.expense.aggregate({
-      where,
+      where: { ...where, deletedAt: null },
       _sum: { amount: true },
     });
 
@@ -172,7 +173,7 @@ export class ExpensesService {
 
   async findById(id: string, businessId: string) {
     const expense = await this.prisma.expense.findFirst({
-      where: { id, businessId },
+      where: { id, businessId, deletedAt: null },
       include: {
         category: { select: { id: true, name: true } },
         user: { select: { id: true, firstName: true, lastName: true } },
@@ -195,10 +196,21 @@ export class ExpensesService {
       throw new BadRequestException('Invalid expense category');
     }
 
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const todayCount = await this.prisma.expense.count({
+      where: { businessId, createdAt: { gte: todayStart, lt: todayEnd }, deletedAt: null },
+    });
+    const seq = (todayCount + 1).toString().padStart(4, '0');
+    const expenseNumber = `EXP-${dateStr}-${seq}`;
+
     return this.prisma.expense.create({
       data: {
         businessId,
         userId,
+        expenseNumber,
         categoryId: dto.categoryId,
         amount: dto.amount,
         description: dto.description.trim(),
@@ -214,7 +226,7 @@ export class ExpensesService {
 
   async update(id: string, businessId: string, dto: UpdateExpenseDto) {
     const expense = await this.prisma.expense.findFirst({
-      where: { id, businessId },
+      where: { id, businessId, deletedAt: null },
     });
 
     if (!expense) {
@@ -249,14 +261,17 @@ export class ExpensesService {
 
   async remove(id: string, businessId: string) {
     const expense = await this.prisma.expense.findFirst({
-      where: { id, businessId },
+      where: { id, businessId, deletedAt: null },
     });
 
     if (!expense) {
       throw new NotFoundException('Expense not found');
     }
 
-    await this.prisma.expense.delete({ where: { id } });
+    await this.prisma.expense.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
     return { message: 'Expense deleted successfully' };
   }
@@ -270,12 +285,12 @@ export class ExpensesService {
 
     const [todayResult, monthResult] = await Promise.all([
       this.prisma.expense.aggregate({
-        where: { businessId, date: { gte: todayStart, lt: todayEnd } },
+        where: { businessId, deletedAt: null, date: { gte: todayStart, lt: todayEnd } },
         _sum: { amount: true },
         _count: true,
       }),
       this.prisma.expense.aggregate({
-        where: { businessId, date: { gte: monthStart, lt: monthEnd } },
+        where: { businessId, deletedAt: null, date: { gte: monthStart, lt: monthEnd } },
         _sum: { amount: true },
         _count: true,
       }),
