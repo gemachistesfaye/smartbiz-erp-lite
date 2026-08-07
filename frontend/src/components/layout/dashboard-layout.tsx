@@ -19,6 +19,7 @@ const routeLabels: Record<string, string> = {
   settings: 'Settings',
   profile: 'Profile',
   suppliers: 'Suppliers',
+  help: 'Help & Support',
 };
 
 function Breadcrumbs() {

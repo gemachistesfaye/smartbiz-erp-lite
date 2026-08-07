@@ -22,9 +22,7 @@ function withSuspense(Component: React.LazyExoticComponent<React.ComponentType>)
 }
 
 const LoginPage = withSuspense(
-  lazy(() =>
-    import('@/features/auth/pages/login-page').then((m) => ({ default: m.LoginPage })),
-  ),
+  lazy(() => import('@/features/auth/pages/login-page').then((m) => ({ default: m.LoginPage }))),
 );
 const RegisterPage = withSuspense(
   lazy(() =>
@@ -43,18 +41,20 @@ const ProductsPage = withSuspense(
 );
 const ProductDetailPage = withSuspense(
   lazy(() =>
-    import('@/features/products/pages/product-detail-page').then((m) => ({ default: m.ProductDetailPageWrapper })),
+    import('@/features/products/pages/product-detail-page').then((m) => ({
+      default: m.ProductDetailPageWrapper,
+    })),
   ),
 );
 const CategoriesPage = withSuspense(
   lazy(() =>
-    import('@/features/categories/pages/categories-page').then((m) => ({ default: m.CategoriesPage })),
+    import('@/features/categories/pages/categories-page').then((m) => ({
+      default: m.CategoriesPage,
+    })),
   ),
 );
 const UnitsPage = withSuspense(
-  lazy(() =>
-    import('@/features/units/pages/units-page').then((m) => ({ default: m.UnitsPage })),
-  ),
+  lazy(() => import('@/features/units/pages/units-page').then((m) => ({ default: m.UnitsPage }))),
 );
 const InventoryPage = withSuspense(
   lazy(() =>
@@ -63,7 +63,9 @@ const InventoryPage = withSuspense(
 );
 const InventoryHistoryPage = withSuspense(
   lazy(() =>
-    import('@/features/inventory/pages/inventory-history-page').then((m) => ({ default: m.InventoryHistoryPage })),
+    import('@/features/inventory/pages/inventory-history-page').then((m) => ({
+      default: m.InventoryHistoryPage,
+    })),
   ),
 );
 const LowStockPage = withSuspense(
@@ -78,17 +80,23 @@ const SuppliersPage = withSuspense(
 );
 const SupplierDetailPage = withSuspense(
   lazy(() =>
-    import('@/features/suppliers/pages/supplier-detail-page').then((m) => ({ default: m.SupplierDetailPage })),
+    import('@/features/suppliers/pages/supplier-detail-page').then((m) => ({
+      default: m.SupplierDetailPage,
+    })),
   ),
 );
 const ReceiveStockPage = withSuspense(
   lazy(() =>
-    import('@/features/stock/pages/receive-stock-page').then((m) => ({ default: m.ReceiveStockPage })),
+    import('@/features/stock/pages/receive-stock-page').then((m) => ({
+      default: m.ReceiveStockPage,
+    })),
   ),
 );
 const AdjustStockPage = withSuspense(
   lazy(() =>
-    import('@/features/stock/pages/adjust-stock-page').then((m) => ({ default: m.AdjustStockPage })),
+    import('@/features/stock/pages/adjust-stock-page').then((m) => ({
+      default: m.AdjustStockPage,
+    })),
   ),
 );
 const CustomersPage = withSuspense(
@@ -98,13 +106,13 @@ const CustomersPage = withSuspense(
 );
 const CustomerDetailPage = withSuspense(
   lazy(() =>
-    import('@/features/customers/pages/customer-detail-page').then((m) => ({ default: m.CustomerDetailPage })),
+    import('@/features/customers/pages/customer-detail-page').then((m) => ({
+      default: m.CustomerDetailPage,
+    })),
   ),
 );
 const SalesPage = withSuspense(
-  lazy(() =>
-    import('@/features/sales/pages/sales-page').then((m) => ({ default: m.SalesPage })),
-  ),
+  lazy(() => import('@/features/sales/pages/sales-page').then((m) => ({ default: m.SalesPage }))),
 );
 const ExpensesPage = withSuspense(
   lazy(() =>
@@ -126,6 +134,9 @@ const ProfilePage = withSuspense(
     import('@/features/profile/pages/profile-page').then((m) => ({ default: m.ProfilePage })),
   ),
 );
+const HelpPage = withSuspense(
+  lazy(() => import('@/features/help/pages/help-page').then((m) => ({ default: m.HelpPage }))),
+);
 const NotFoundPage = withSuspense(
   lazy(() =>
     import('@/components/shared/not-found-page').then((m) => ({ default: m.NotFoundPage })),
@@ -135,9 +146,7 @@ const NotFoundPage = withSuspense(
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
   errorComponent: ({ error }) => (
-    <ServerErrorPage
-      message={error?.message || 'An unexpected error occurred.'}
-    />
+    <ServerErrorPage message={error?.message || 'An unexpected error occurred.'} />
   ),
 });
 
@@ -291,6 +300,12 @@ const profileRoute = createRoute({
   component: ProfilePage,
 });
 
+const helpRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/help',
+  component: HelpPage,
+});
+
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -329,6 +344,7 @@ const routeTree = rootRoute.addChildren([
     reportsRoute,
     settingsRoute,
     profileRoute,
+    helpRoute,
   ]),
   notFoundRoute,
 ]);
@@ -337,9 +353,7 @@ export const router = createRouter({
   routeTree,
   defaultPendingComponent: LoadingScreen,
   defaultErrorComponent: ({ error }) => (
-    <ServerErrorPage
-      message={error?.message || 'Something went wrong.'}
-    />
+    <ServerErrorPage message={error?.message || 'Something went wrong.'} />
   ),
 });
 

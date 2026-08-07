@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Menu, Moon, Sun, Bell, Search, LogOut, User, Settings, ChevronDown } from 'lucide-react';
+import { Menu, Moon, Sun, Bell, Search, LogOut, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -36,7 +36,7 @@ export function Navbar() {
   return (
     <TooltipProvider>
       <header
-        className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-5"
+        className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-5 relative"
         role="banner"
       >
         {/* Mobile menu button */}
@@ -125,6 +125,9 @@ export function Navbar() {
                     {user ? `${user.firstName} ${user.lastName}` : 'User'}
                   </p>
                   <p className="text-xs text-muted-foreground leading-tight">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground/70 leading-tight">
+                    {user?.role ? ROLE_LABELS[user.role] : 'Role'}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -132,12 +135,6 @@ export function Navbar() {
                 <Link to="/profile" className="flex items-center gap-2.5">
                   <User className="h-4 w-4 shrink-0" />
                   Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="px-3 py-2 cursor-pointer">
-                <Link to="/settings" className="flex items-center gap-2.5">
-                  <Settings className="h-4 w-4 shrink-0" />
-                  Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

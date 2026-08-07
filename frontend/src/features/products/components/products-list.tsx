@@ -71,7 +71,7 @@ export function ProductsList() {
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <input
           type="search"
           placeholder="Search products..."
@@ -80,50 +80,52 @@ export function ProductsList() {
             setSearch(e.target.value);
             setPage(1);
           }}
-          className="flex h-9 w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="flex h-9 w-full sm:max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
-        <select
-          value={categoryFilter}
-          onChange={(e) => {
-            setCategoryFilter(e.target.value);
-            setPage(1);
-          }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Status</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-        </select>
-        <select
-          value={unitFilter}
-          onChange={(e) => {
-            setUnitFilter(e.target.value);
-            setPage(1);
-          }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Units</option>
-          {units.map((unit) => (
-            <option key={unit.id} value={unit.id}>
-              {unit.name}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setPage(1);
+            }}
+            className="flex h-9 shrink-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="flex h-9 shrink-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+          >
+            <option value="">All Status</option>
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+          <select
+            value={unitFilter}
+            onChange={(e) => {
+              setUnitFilter(e.target.value);
+              setPage(1);
+            }}
+            className="flex h-9 shrink-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+          >
+            <option value="">All Units</option>
+            {units.map((unit) => (
+              <option key={unit.id} value={unit.id}>
+                {unit.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {showEmptyState ? (
@@ -212,11 +214,13 @@ export function ProductsList() {
                     <td className="p-4">
                       {product.category ? (
                         <Badge
-                          variant="secondary"
+                          variant="outline"
+                          className="font-medium"
                           style={
                             product.category.color
                               ? {
-                                  backgroundColor: product.category.color + '20',
+                                  borderColor: product.category.color + '40',
+                                  backgroundColor: product.category.color + '15',
                                   color: product.category.color,
                                 }
                               : undefined
@@ -225,7 +229,7 @@ export function ProductsList() {
                           {product.category.name}
                         </Badge>
                       ) : (
-                        '-'
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </td>
                     <td className="p-4 text-muted-foreground">{product.unit?.symbol || '-'}</td>
