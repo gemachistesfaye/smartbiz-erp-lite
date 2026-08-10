@@ -13,11 +13,12 @@ export default defineConfig({
       manifest: {
         name: 'SmartBiz ERP Lite',
         short_name: 'SmartBiz',
-        description: 'Offline-First ERP Progressive Web Application',
+        description: 'SmartBiz ERP Lite for small and medium businesses',
         theme_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
         scope: '/',
+        orientation: 'portrait-primary',
         icons: [
           {
             src: 'pwa-192x192.png',
