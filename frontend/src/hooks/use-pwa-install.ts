@@ -55,12 +55,7 @@ export function usePwaInstall() {
   }, []);
 
   const promptInstall = useCallback(async () => {
-    if (!deferredPrompt) {
-      alert(
-        'App installation is not currently available in this browser or environment (requires HTTPS/localhost and PWA support).',
-      );
-      return;
-    }
+    if (!deferredPrompt) return;
 
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;

@@ -42,7 +42,7 @@ export function Navbar() {
   const { user } = useAuthStore();
   const logout = useLogout();
   const [searchQuery, setSearchQuery] = useState('');
-  const { isStandalone, promptInstall } = usePwaInstall();
+  const { isInstallable, promptInstall } = usePwaInstall();
 
   const userInitials =
     user && user.firstName
@@ -132,8 +132,8 @@ export function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Install App Icon (Always visible so users can discover it) */}
-          {!isStandalone && (
+          {/* Install App Icon */}
+          {isInstallable && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
