@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Menu, Moon, Sun, Bell, Search, LogOut, User, ChevronDown, ShieldCheck } from 'lucide-react';
+import { Menu, Moon, Sun, Bell, Search, LogOut, User, ChevronDown, Shield, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,7 +28,6 @@ export function Navbar() {
   const { user } = useAuthStore();
   const logout = useLogout();
   const [searchQuery, setSearchQuery] = useState('');
-  const isOwner = user?.role === 'OWNER';
 
   const userInitials = user
     ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
@@ -37,22 +36,28 @@ export function Navbar() {
   return (
     <TooltipProvider>
       <header
-        className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-5 relative"
+        className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6"
         role="banner"
       >
-        {/* Mobile menu button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(true)}
-          className="lg:hidden"
-          aria-label="Open navigation menu"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        {/* Left zone: Mobile menu + Branding */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <Link to="/dashboard" className="flex items-center gap-2 lg:hidden">
+            <Store className="h-5 w-5 text-primary" />
+            <span className="text-sm font-bold">SmartBiz</span>
+          </Link>
+        </div>
 
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
+        {/* Center zone: Search */}
+        <div className="relative flex-1 max-w-md mx-auto">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -64,7 +69,8 @@ export function Navbar() {
           />
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
+        {/* Right zone: Status, Notifications, Theme, Profile */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Online/Offline Status */}
           <Badge variant={isOnline ? 'default' : 'destructive'} className="hidden sm:inline-flex">
             {isOnline ? 'Online' : 'Offline'}
@@ -94,7 +100,7 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="User menu"
               >
                 <Avatar className="h-8 w-8">
@@ -138,14 +144,12 @@ export function Navbar() {
                   Profile
                 </Link>
               </DropdownMenuItem>
-              {isOwner && (
-                <DropdownMenuItem asChild className="px-3 py-2 cursor-pointer">
-                  <Link to="/users" className="flex items-center gap-2.5">
-                    <ShieldCheck className="h-4 w-4 shrink-0" />
-                    Users
-                  </Link>
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem asChild className="px-3 py-2 cursor-pointer">
+                <Link to="/profile" className="flex items-center gap-2.5">
+                  <Shield className="h-4 w-4 shrink-0" />
+                  Account Security
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => logout.mutate()}

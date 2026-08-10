@@ -12,10 +12,9 @@ const createTestRouter = (component: React.ReactNode) => {
 
 const renderWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const router = createTestRouter(component);
   return render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      {component}
     </QueryClientProvider>,
   );
 };

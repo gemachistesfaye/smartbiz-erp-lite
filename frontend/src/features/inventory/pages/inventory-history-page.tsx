@@ -3,18 +3,26 @@ import { useInventoryTransactions } from '../hooks/use-inventory';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { formatDateTime } from '@/lib/utils';
 import { History } from 'lucide-react';
 
 const TYPE_COLORS: Record<string, string> = {
-  STOCK_IN: 'bg-green-100 text-green-800',
-  STOCK_OUT: 'bg-red-100 text-red-800',
-  ADJUSTMENT: 'bg-blue-100 text-blue-800',
-  DAMAGE: 'bg-orange-100 text-orange-800',
-  LOSS: 'bg-yellow-100 text-yellow-800',
-  CORRECTION: 'bg-purple-100 text-purple-800',
-  RETURN: 'bg-cyan-100 text-cyan-800',
-  TRANSFER: 'bg-gray-100 text-gray-800',
+  STOCK_IN: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  STOCK_OUT: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  ADJUSTMENT: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  DAMAGE: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+  LOSS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  CORRECTION: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  RETURN: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+  TRANSFER: 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300',
 };
 
 export function InventoryHistoryPage() {
@@ -37,23 +45,40 @@ export function InventoryHistoryPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <select
-          value={typeFilter}
-          onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Types</option>
-          <option value="STOCK_IN">Stock In</option>
-          <option value="STOCK_OUT">Stock Out</option>
-          <option value="ADJUSTMENT">Adjustment</option>
-          <option value="DAMAGE">Damage</option>
-          <option value="LOSS">Loss</option>
-          <option value="CORRECTION">Correction</option>
-          <option value="RETURN">Return</option>
-        </select>
+        <Select value={typeFilter || 'all'} onValueChange={(v) => { setTypeFilter(v === 'all' ? '' : v); setPage(1); }}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="STOCK_IN">Stock In</SelectItem>
+            <SelectItem value="STOCK_OUT">Stock Out</SelectItem>
+            <SelectItem value="ADJUSTMENT">Adjustment</SelectItem>
+            <SelectItem value="DAMAGE">Damage</SelectItem>
+            <SelectItem value="LOSS">Loss</SelectItem>
+            <SelectItem value="CORRECTION">Correction</SelectItem>
+            <SelectItem value="RETURN">Return</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {transactions.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : transactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <History className="h-12 w-12 text-muted-foreground/50" />
           <h3 className="mt-4 text-lg font-semibold">No transactions yet</h3>
@@ -69,7 +94,7 @@ export function InventoryHistoryPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium">{tx.product?.name}</p>
                         {tx.product?.sku && (
                           <span className="text-xs text-muted-foreground">({tx.product.sku})</span>
@@ -80,7 +105,7 @@ export function InventoryHistoryPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-lg font-bold ${tx.quantity > 0 ? 'text-green-600' : 'text-destructive'}`}>
+                    <p className={`text-lg font-bold ${tx.quantity > 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
                       {tx.quantity > 0 ? '+' : ''}{tx.quantity}
                     </p>
                     <p className="text-xs text-muted-foreground">

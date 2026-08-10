@@ -1,8 +1,17 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Receipt, Tag } from 'lucide-react';
+import { Plus, Pencil, Trash2, Receipt, Tag, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -100,43 +109,50 @@ export function ExpensesList() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3">
-        <input
-          type="search"
-          placeholder="Search expenses..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex h-9 w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
-        <select
-          value={categoryFilter}
-          onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Categories</option>
-          {categories?.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-        <select
-          value={paymentFilter}
-          onChange={(e) => { setPaymentFilter(e.target.value); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Methods</option>
-          <option value="CASH">Cash</option>
-          <option value="MOBILE_MONEY">Mobile Money</option>
-          <option value="CREDIT">Credit</option>
-        </select>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => { setSearch(''); setCategoryFilter(''); setPaymentFilter(''); setPage(1); }}
-          >
-            Clear filters
-          </Button>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search expenses..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={categoryFilter || 'all'} onValueChange={(v) => { setCategoryFilter(v === 'all' ? '' : v); setPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={paymentFilter || 'all'} onValueChange={(v) => { setPaymentFilter(v === 'all' ? '' : v); setPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="All Methods" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Methods</SelectItem>
+              <SelectItem value="CASH">Cash</SelectItem>
+              <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
+              <SelectItem value="CREDIT">Credit</SelectItem>
+            </SelectContent>
+          </Select>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setSearch(''); setCategoryFilter(''); setPaymentFilter(''); setPage(1); }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
       </div>
 
       {expenses.length === 0 && !isLoading && !hasActiveFilters ? (
@@ -170,7 +186,7 @@ export function ExpensesList() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b">
-                    <td colSpan={8} className="p-4"><div className="h-8 bg-muted animate-pulse rounded" /></td>
+                    <td colSpan={8} className="p-4"><Skeleton className="h-8 w-full" /></td>
                   </tr>
                 ))
               ) : expenses.length === 0 ? (

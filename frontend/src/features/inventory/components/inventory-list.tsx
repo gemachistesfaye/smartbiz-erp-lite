@@ -1,9 +1,18 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Package, AlertTriangle, XCircle, TrendingUp } from 'lucide-react';
+import { Package, AlertTriangle, XCircle, TrendingUp, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useInventoryList, useInventoryStats } from '../hooks/use-inventory';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
@@ -27,7 +36,7 @@ export function InventoryList() {
       case 'out_of_stock':
         return <Badge variant="destructive">Out of Stock</Badge>;
       case 'low_stock':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Low Stock</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400">Low Stock</Badge>;
       case 'overstock':
         return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Overstock</Badge>;
       default:
@@ -91,24 +100,28 @@ export function InventoryList() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3">
-        <input
-          type="search"
-          placeholder="Search inventory..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex h-9 w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
-        <select
-          value={stockStatusFilter}
-          onChange={(e) => { setStockStatusFilter(e.target.value); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Stock Status</option>
-          <option value="out">Out of Stock</option>
-          <option value="low">Low Stock</option>
-          <option value="normal">Normal</option>
-        </select>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search inventory..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+        <Select value={stockStatusFilter || 'all'} onValueChange={(v) => { setStockStatusFilter(v === 'all' ? '' : v); setPage(1); }}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="All Stock Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stock Status</SelectItem>
+            <SelectItem value="out">Out of Stock</SelectItem>
+            <SelectItem value="low">Low Stock</SelectItem>
+            <SelectItem value="normal">Normal</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {inventories.length === 0 && !isLoading ? (
@@ -138,7 +151,7 @@ export function InventoryList() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b">
-                    <td colSpan={8} className="p-4"><div className="h-8 bg-muted animate-pulse rounded" /></td>
+                    <td colSpan={8} className="p-4"><Skeleton className="h-8 w-full" /></td>
                   </tr>
                 ))
               ) : inventories.length === 0 ? (

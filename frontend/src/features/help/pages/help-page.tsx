@@ -1,30 +1,54 @@
-import { HelpCircle, Package, Warehouse, ShoppingCart, Users, Settings } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { HelpCircle, Package, Warehouse, ShoppingCart, Users, Settings, LayoutDashboard, BarChart3, CreditCard, ArrowRight } from 'lucide-react';
 
 const sections = [
+  {
+    icon: LayoutDashboard,
+    title: 'Dashboard',
+    description: 'Get an overview of your business performance with key metrics and charts.',
+    href: '/dashboard',
+  },
   {
     icon: Package,
     title: 'Product Management',
     description: 'Add, edit, and organize your products with categories, units, and pricing.',
+    href: '/products',
   },
   {
     icon: Warehouse,
     title: 'Inventory',
     description: 'Track stock levels, receive inventory, and manage low-stock alerts.',
+    href: '/inventory',
   },
   {
     icon: ShoppingCart,
-    title: 'Sales & Expenses',
-    description: 'Record sales transactions and track business expenses.',
+    title: 'Sales & POS',
+    description: 'Record sales transactions, process payments, and manage the point of sale.',
+    href: '/pos',
+  },
+  {
+    icon: CreditCard,
+    title: 'Customer Credit',
+    description: 'Manage customer accounts, credit limits, and payment tracking.',
+    href: '/customers',
   },
   {
     icon: Users,
-    title: 'Customer Credit',
-    description: 'Manage customer accounts, credit limits, and payment tracking.',
+    title: 'User Management',
+    description: 'Add users, manage roles, and control access to the system.',
+    href: '/users',
+  },
+  {
+    icon: BarChart3,
+    title: 'Reports',
+    description: 'View detailed reports on sales, inventory, expenses, and profitability.',
+    href: '/reports',
   },
   {
     icon: Settings,
     title: 'System Settings',
-    description: 'Configure your business profile, preferences, and integrations.',
+    description: 'Configure your business profile, currency, tax settings, and receipts.',
+    href: '/settings',
   },
 ];
 
@@ -40,15 +64,22 @@ export function HelpPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sections.map((section) => (
-          <div key={section.title} className="rounded-lg border p-6 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <section.icon className="h-5 w-5 text-primary" />
+          <Link
+            key={section.title}
+            to={section.href}
+            className="group rounded-lg border p-6 space-y-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <section.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold">{section.title}</h3>
               </div>
-              <h3 className="font-semibold">{section.title}</h3>
+              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <p className="text-sm text-muted-foreground">{section.description}</p>
-          </div>
+          </Link>
         ))}
       </div>
 

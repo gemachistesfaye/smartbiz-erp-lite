@@ -14,7 +14,8 @@ A production-ready Offline-First ERP Progressive Web Application designed for Et
 - **Sales** - Point of Sale (POS) and sales management
 - **Expenses** - Expense tracking and categorization
 - **Reports** - Business analytics and reporting
-- **Offline-First** - Works without internet connection
+- **Settings** - Business configuration
+- **Offline-First PWA** - Progressive Web App support with service workers and manifest
 
 ## Tech Stack
 
@@ -103,13 +104,13 @@ smartbiz-erp-lite/
 │   │   │   ├── products/  # Products (CRUD, form, detail, hooks)
 │   │   │   ├── categories/# Categories (CRUD, form, list, hooks)
 │   │   │   ├── units/     # Units (CRUD, form, list, hooks)
-│   │   │   ├── inventory/ # Inventory (placeholder)
-│   │   │   ├── customers/ # Customers (placeholder)
-│   │   │   ├── sales/     # Sales (placeholder)
-│   │   │   ├── expenses/  # Expenses (placeholder)
-│   │   │   ├── reports/   # Reports (placeholder)
-│   │   │   ├── settings/  # Settings (placeholder)
-│   │   │   └── profile/   # Profile (placeholder)
+│   │   │   ├── inventory/ # Inventory management (CRUD, adjustments)
+│   │   │   ├── customers/ # Customer management and credit tracking
+│   │   │   ├── sales/     # Point of sale and sales history
+│   │   │   ├── expenses/  # Expense tracking and categories
+│   │   │   ├── reports/   # Analytics and reporting dashboard
+│   │   │   ├── settings/  # Business settings configuration
+│   │   │   └── profile/   # User profile management
 │   │   ├── hooks/     # Custom React hooks
 │   │   ├── lib/       # Utilities, API client, constants
 │   │   ├── routes/    # TanStack Router routes

@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Receipt, Plus, DollarSign } from 'lucide-react';
+import { Receipt, Plus, DollarSign, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useSales } from '../hooks/use-sales';
 import { formatCurrency } from '@/lib/utils';
+import { Package } from 'lucide-react';
 
 export function SalesHistoryPage() {
   const [search, setSearch] = useState('');
@@ -82,32 +92,39 @@ export function SalesHistoryPage() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <input
-          type="search"
-          placeholder="Search sales..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex h-9 w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
-        <select
-          value={paymentMethod}
-          onChange={(e) => { setPaymentMethod(e.target.value); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Payment Methods</option>
-          <option value="CASH">Cash</option>
-          <option value="CREDIT">Credit</option>
-        </select>
-        <select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-        >
-          <option value="">All Status</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="VOIDED">Voided</option>
-        </select>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search sales..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={paymentMethod} onValueChange={(v) => { setPaymentMethod(v === 'all' ? '' : v); setPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="All Payment Methods" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Payment Methods</SelectItem>
+              <SelectItem value="CASH">Cash</SelectItem>
+              <SelectItem value="CREDIT">Credit</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={status} onValueChange={(v) => { setStatus(v === 'all' ? '' : v); setPage(1); }}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="COMPLETED">Completed</SelectItem>
+              <SelectItem value="VOIDED">Voided</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {sales.length === 0 && !isLoading ? (
@@ -117,6 +134,12 @@ export function SalesHistoryPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Start a new sale to see it here.
           </p>
+          <Link to="/pos" className="mt-4">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Sale
+            </Button>
+          </Link>
         </div>
       ) : (
         <div className="rounded-md border overflow-x-auto">
@@ -137,7 +160,9 @@ export function SalesHistoryPage() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b">
-                    <td colSpan={8} className="p-4"><div className="h-8 bg-muted animate-pulse rounded" /></td>
+                    <td colSpan={8} className="p-4">
+                      <Skeleton className="h-8 w-full" />
+                    </td>
                   </tr>
                 ))
               ) : sales.length === 0 ? (

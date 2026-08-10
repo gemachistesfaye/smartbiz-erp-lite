@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Building2, DollarSign, FileText } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,24 +99,29 @@ export function SettingsPage() {
   }
 
   const onSubmit = async (data: SettingsFormData) => {
-    const businessPromise = updateBusiness.mutateAsync({
-      name: data.name,
-      phone: data.phone || undefined,
-      address: data.address || undefined,
-    });
+    try {
+      const businessPromise = updateBusiness.mutateAsync({
+        name: data.name,
+        phone: data.phone || undefined,
+        address: data.address || undefined,
+      });
 
-    const settingsPromise = updateSettings.mutateAsync({
-      currency: data.currency,
-      currencySymbol: data.currencySymbol,
-      taxRate: data.taxRate,
-      lowStockThreshold: data.lowStockThreshold,
-      tinNumber: data.tinNumber || undefined,
-      vatNumber: data.vatNumber || undefined,
-      receiptHeader: data.receiptHeader || undefined,
-      receiptFooter: data.receiptFooter || undefined,
-    });
+      const settingsPromise = updateSettings.mutateAsync({
+        currency: data.currency,
+        currencySymbol: data.currencySymbol,
+        taxRate: data.taxRate,
+        lowStockThreshold: data.lowStockThreshold,
+        tinNumber: data.tinNumber || undefined,
+        vatNumber: data.vatNumber || undefined,
+        receiptHeader: data.receiptHeader || undefined,
+        receiptFooter: data.receiptFooter || undefined,
+      });
 
-    await Promise.all([businessPromise, settingsPromise]);
+      await Promise.all([businessPromise, settingsPromise]);
+      toast.success('Settings saved successfully');
+    } catch {
+      toast.error('Failed to save settings. Please try again.');
+    }
   };
 
   const isPending = updateSettings.isPending || updateBusiness.isPending;
@@ -123,7 +129,7 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">Manage your business configuration and preferences</p>
       </div>
 

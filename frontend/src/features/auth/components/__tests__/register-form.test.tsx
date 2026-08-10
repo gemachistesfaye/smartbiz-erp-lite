@@ -1,23 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
+import { vi } from 'vitest';
 import { RegisterForm } from '@/features/auth/components/register-form';
 
-const createTestRouter = (component: React.ReactNode) => {
-  const rootRoute = createRootRoute({
-    component: () => component,
-  });
-
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/',
-  });
-
-  const routeTree = rootRoute.addChildren([indexRoute]);
-
-  return createRouter({ routeTree });
-};
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to }: any) => <a href={to}>{children}</a>,
+  useNavigate: () => vi.fn(),
+}));
 
 const renderWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient({
@@ -26,11 +16,9 @@ const renderWithProviders = (component: React.ReactNode) => {
     },
   });
 
-  const router = createTestRouter(component);
-
   return render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      {component}
     </QueryClientProvider>,
   );
 };
@@ -54,7 +42,7 @@ describe('RegisterForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/business name must be at least 2 characters/i)).toBeInTheDocument();
+      expect(screen.getByText(/business name is required/i)).toBeInTheDocument();
       expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
       expect(screen.getByText(/last name is required/i)).toBeInTheDocument();
       expect(screen.getByText(/please enter a valid email/i)).toBeInTheDocument();
@@ -77,11 +65,11 @@ describe('RegisterForm', () => {
     fireEvent.input(screen.getByLabelText(/email/i), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    fireEvent.input(screen.getByLabelText(/^password$/i), {
       target: { value: 'password123' },
     });
     fireEvent.input(screen.getByLabelText(/confirm password/i), {
-      target: { value: 'password456' },
+      target: { value: 'password124' },
     });
 
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
@@ -94,13 +82,13 @@ describe('RegisterForm', () => {
   it('toggles password visibility', () => {
     renderWithProviders(<RegisterForm />);
 
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/^password/i);
     expect(passwordInput).toHaveAttribute('type', 'password');
 
-    fireEvent.click(screen.getByText(/show/i));
+    fireEvent.click(screen.getAllByText(/show/i)[0]);
     expect(passwordInput).toHaveAttribute('type', 'text');
 
-    fireEvent.click(screen.getByText(/hide/i));
+    fireEvent.click(screen.getAllByText(/hide/i)[0]);
     expect(passwordInput).toHaveAttribute('type', 'password');
   });
 });

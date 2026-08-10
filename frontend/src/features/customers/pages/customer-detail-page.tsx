@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorScreen } from '@/components/shared/error-screen';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 import {
   Mail,
   Phone,
@@ -94,8 +94,9 @@ export function CustomerDetailPage() {
             <Pencil className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowDeleteDialog(true)}>
-            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+          <Button variant="outline" size="sm" onClick={() => setShowDeleteDialog(true)} className="text-destructive hover:text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
           </Button>
         </div>
       </div>
@@ -152,7 +153,7 @@ export function CustomerDetailPage() {
                   Credit Limit
                 </div>
                 <p className="mt-1 text-lg font-bold">
-                  Br {customer.creditLimit ? Number(customer.creditLimit).toLocaleString() : 'None'}
+                  {customer.creditLimit ? formatCurrency(Number(customer.creditLimit)) : 'None'}
                 </p>
               </div>
               <div className="rounded-lg bg-muted p-3">
@@ -160,8 +161,8 @@ export function CustomerDetailPage() {
                   <AlertCircle className="h-4 w-4" />
                   Outstanding
                 </div>
-                <p className="mt-1 text-lg font-bold text-orange-600">
-                  Br {customer.outstandingBalance.toLocaleString()}
+                <p className="mt-1 text-lg font-bold text-orange-600 dark:text-orange-400">
+                  {formatCurrency(customer.outstandingBalance)}
                 </p>
               </div>
               <div className="rounded-lg bg-muted p-3">
@@ -170,7 +171,7 @@ export function CustomerDetailPage() {
                   Total Purchases
                 </div>
                 <p className="mt-1 text-lg font-bold">
-                  Br {customer.totalPurchaseAmount.toLocaleString()}
+                  {formatCurrency(customer.totalPurchaseAmount)}
                 </p>
                 <p className="text-xs text-muted-foreground">{customer.totalPurchases} transaction{customer.totalPurchases !== 1 ? 's' : ''}</p>
               </div>
@@ -179,8 +180,8 @@ export function CustomerDetailPage() {
                   <TrendingDown className="h-4 w-4" />
                   Total Paid
                 </div>
-                <p className="mt-1 text-lg font-bold text-green-600">
-                  Br {customer.totalPaid.toLocaleString()}
+                <p className="mt-1 text-lg font-bold text-green-600 dark:text-green-400">
+                  {formatCurrency(customer.totalPaid)}
                 </p>
               </div>
             </div>
@@ -188,8 +189,8 @@ export function CustomerDetailPage() {
               <div className="pt-2 border-t">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Available Credit</span>
-                  <span className={`font-medium ${customer.availableCredit <= 0 ? 'text-destructive' : 'text-green-600'}`}>
-                    Br {customer.availableCredit.toLocaleString()}
+                  <span className={`font-medium ${customer.availableCredit <= 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400'}`}>
+                    {formatCurrency(customer.availableCredit)}
                   </span>
                 </div>
               </div>
@@ -227,7 +228,7 @@ export function CustomerDetailPage() {
                 {paymentList.slice(0, 10).map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between rounded-lg border p-3">
                     <div>
-                      <p className="font-medium">Br {Number(payment.amount).toLocaleString()}</p>
+                      <p className="font-medium">{formatCurrency(Number(payment.amount))}</p>
                       <p className="text-xs text-muted-foreground">
                         {payment.method.replace('_', ' ')} - {formatDate(payment.createdAt)}
                       </p>
@@ -260,9 +261,9 @@ export function CustomerDetailPage() {
                   <div key={activity.id} className="flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
                       {activity.type === 'CREDIT_SALE' ? (
-                        <TrendingUp className="h-4 w-4 text-orange-500" />
+                        <TrendingUp className="h-4 w-4 text-orange-500 dark:text-orange-400" />
                       ) : (
-                        <TrendingDown className="h-4 w-4 text-green-500" />
+                        <TrendingDown className="h-4 w-4 text-green-500 dark:text-green-400" />
                       )}
                       <div>
                         <p className="font-medium">{activity.description}</p>
@@ -271,10 +272,10 @@ export function CustomerDetailPage() {
                     </div>
                     <span
                       className={`font-medium ${
-                        activity.type === 'CREDIT_SALE' ? 'text-orange-600' : 'text-green-600'
+                        activity.type === 'CREDIT_SALE' ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'
                       }`}
                     >
-                      {activity.type === 'CREDIT_SALE' ? '+' : '-'} Br {activity.amount.toLocaleString()}
+                      {activity.type === 'CREDIT_SALE' ? '+' : '-'} {formatCurrency(activity.amount)}
                     </span>
                   </div>
                 ))}
@@ -284,7 +285,7 @@ export function CustomerDetailPage() {
               <div className="mt-4 pt-4 border-t">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Current Balance</span>
-                  <span className="font-bold">Br {creditHistory.currentBalance.toLocaleString()}</span>
+                  <span className="font-bold">{formatCurrency(creditHistory.currentBalance)}</span>
                 </div>
               </div>
             )}
@@ -324,7 +325,7 @@ export function CustomerDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Customer</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{fullName}&quot;? This action can be undone.
+              Are you sure you want to delete &quot;{fullName}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

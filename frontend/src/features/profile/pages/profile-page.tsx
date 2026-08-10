@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Mail, Shield, Calendar, Building2, Lock, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -58,7 +59,14 @@ export function ProfilePage() {
   const displayUser = currentUser || user;
 
   const onUpdateProfile = (data: ProfileFormData) => {
-    updateProfile.mutate(data);
+    updateProfile.mutate(data, {
+      onSuccess: () => {
+        toast.success('Profile updated successfully');
+      },
+      onError: () => {
+        toast.error('Failed to update profile. Please try again.');
+      },
+    });
   };
 
   const onChangePassword = (data: PasswordFormData) => {
@@ -77,7 +85,7 @@ export function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Profile</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
         <p className="text-muted-foreground">Manage your account information and security</p>
       </div>
 

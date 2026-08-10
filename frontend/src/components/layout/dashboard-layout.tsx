@@ -16,12 +16,12 @@ const routeLabels: Record<string, string> = {
   sales: 'Sales',
   expenses: 'Expenses',
   reports: 'Reports',
-  settings: 'Settings',
+  settings: 'Business Settings',
   profile: 'Profile',
   suppliers: 'Suppliers',
   help: 'Help & Support',
   pos: 'Point of Sale',
-  users: 'Users',
+  users: 'User Management',
 };
 
 function Breadcrumbs() {

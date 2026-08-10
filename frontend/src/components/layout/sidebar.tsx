@@ -22,12 +22,13 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIStore } from '@/stores/ui-store';
 import { useAuthStore } from '@/features/auth/store/auth-store';
 
 const navSections = [
   {
-    label: null,
+    label: 'Main',
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'POS', href: '/pos', icon: Banknote },
@@ -58,14 +59,58 @@ const navSections = [
   },
 ];
 
-const bottomNavigation = [
-  { name: 'Settings', href: '/settings', icon: Settings },
+const adminNavigation = [
+  { name: 'Business Settings', href: '/settings', icon: Settings },
+  { name: 'User Management', href: '/users', icon: ShieldCheck },
+];
+
+const supportNavigation = [
   { name: 'Help & Support', href: '/help', icon: HelpCircle },
 ];
 
-const adminNavigation = [
-  { name: 'Users', href: '/users', icon: ShieldCheck },
-];
+function SidebarNavItem({
+  item,
+  isActive,
+  sidebarCollapsed,
+  onClick,
+}: {
+  item: { name: string; href: string; icon: React.ComponentType<{ className?: string }> };
+  isActive: boolean;
+  sidebarCollapsed: boolean;
+  onClick?: () => void;
+}) {
+  const link = (
+    <Link
+      to={item.href}
+      role="menuitem"
+      className={cn(
+        'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
+        isActive
+          ? 'bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        sidebarCollapsed && 'justify-center px-2',
+      )}
+      onClick={onClick}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      <item.icon className="h-4 w-4 shrink-0" />
+      {!sidebarCollapsed && <span>{item.name}</span>}
+    </Link>
+  );
+
+  if (sidebarCollapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right" sideOffset={8}>
+          {item.name}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return link;
+}
 
 export function Sidebar() {
   const matchRoute = useMatchRoute();
@@ -74,7 +119,7 @@ export function Sidebar() {
   const isOwner = user?.role === 'OWNER';
 
   return (
-    <>
+    <TooltipProvider>
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/80 lg:hidden"
@@ -137,23 +182,13 @@ export function Sidebar() {
               {section.items.map((item) => {
                 const isActive = matchRoute({ to: item.href });
                 return (
-                  <Link
+                  <SidebarNavItem
                     key={item.name}
-                    to={item.href}
-                    role="menuitem"
-                    className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                      sidebarCollapsed && 'justify-center px-2',
-                    )}
+                    item={item}
+                    isActive={isActive}
+                    sidebarCollapsed={sidebarCollapsed}
                     onClick={() => setSidebarOpen(false)}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    <item.icon className="h-4 w-4 shrink-0" />
-                    {!sidebarCollapsed && <span>{item.name}</span>}
-                  </Link>
+                  />
                 );
               })}
             </div>
@@ -165,56 +200,44 @@ export function Sidebar() {
           <Separator className="mb-2" />
           {!sidebarCollapsed && (
             <p className="px-3 pt-2 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-              System
+              Administration
             </p>
           )}
           {sidebarCollapsed && <div className="my-2 h-px bg-border" />}
-          {isOwner && adminNavigation.map((item) => {
+          {adminNavigation
+            .filter((item) => item.name !== 'User Management' || isOwner)
+            .map((item) => {
+              const isActive = matchRoute({ to: item.href });
+              return (
+                <SidebarNavItem
+                  key={item.name}
+                  item={item}
+                  isActive={isActive}
+                  sidebarCollapsed={sidebarCollapsed}
+                  onClick={() => setSidebarOpen(false)}
+                />
+              );
+            })}
+          {!sidebarCollapsed && (
+            <p className="px-3 pt-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+              Support
+            </p>
+          )}
+          {sidebarCollapsed && <div className="my-2 h-px bg-border" />}
+          {supportNavigation.map((item) => {
             const isActive = matchRoute({ to: item.href });
             return (
-              <Link
+              <SidebarNavItem
                 key={item.name}
-                to={item.href}
-                role="menuitem"
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                  sidebarCollapsed && 'justify-center px-2',
-                )}
+                item={item}
+                isActive={isActive}
+                sidebarCollapsed={sidebarCollapsed}
                 onClick={() => setSidebarOpen(false)}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!sidebarCollapsed && <span>{item.name}</span>}
-              </Link>
-            );
-          })}
-          {bottomNavigation.map((item) => {
-            const isActive = matchRoute({ to: item.href });
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                role="menuitem"
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                  sidebarCollapsed && 'justify-center px-2',
-                )}
-                onClick={() => setSidebarOpen(false)}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!sidebarCollapsed && <span>{item.name}</span>}
-              </Link>
+              />
             );
           })}
         </div>
       </aside>
-    </>
+    </TooltipProvider>
   );
 }

@@ -91,17 +91,21 @@ export function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Unable to load dashboard data. Please try again later.
+            Unable to load dashboard data.
           </p>
         </div>
         <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-destructive mb-2">Failed to load dashboard</p>
-            <p className="text-sm text-muted-foreground">
-              Check your connection and try refreshing the page.
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
+            <p className="text-lg font-semibold mb-2">Failed to load dashboard</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Check your connection and try again.
             </p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try Again
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -193,8 +197,8 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">
-          Welcome back, {displayName} 👋
+        <h1 className="text-2xl font-bold tracking-tight">
+          Welcome back, {displayName}
         </h1>
         <p className="text-muted-foreground mt-1">
           Here's what's happening with your business today.
@@ -222,7 +226,7 @@ export function DashboardPage() {
           <QuickActionCard
             label="New Sale"
             icon={Plus}
-            onClick={() => navigate({ to: '/sales' })}
+            onClick={() => navigate({ to: '/pos' })}
           />
           <QuickActionCard
             label="Add Product"

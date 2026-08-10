@@ -1,23 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
+import { vi } from 'vitest';
 import { LoginForm } from '@/features/auth/components/login-form';
 
-const createTestRouter = (component: React.ReactNode) => {
-  const rootRoute = createRootRoute({
-    component: () => component,
-  });
-
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/',
-  });
-
-  const routeTree = rootRoute.addChildren([indexRoute]);
-
-  return createRouter({ routeTree });
-};
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to }: any) => <a href={to}>{children}</a>,
+  useNavigate: () => vi.fn(),
+}));
 
 const renderWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient({
@@ -26,11 +16,9 @@ const renderWithProviders = (component: React.ReactNode) => {
     },
   });
 
-  const router = createTestRouter(component);
-
   return render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      {component}
     </QueryClientProvider>,
   );
 };
