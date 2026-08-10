@@ -64,7 +64,8 @@ export const API_ENDPOINTS = {
     OVERDUE: '/customers/overdue',
     PAYMENTS: (id: string) => `/customers/${id}/payments`,
     CREDIT_HISTORY: (id: string) => `/customers/${id}/credit-history`,
-    CAN_USE_CREDIT: (id: string, amount: number) => `/customers/${id}/can-use-credit?amount=${amount}`,
+    CAN_USE_CREDIT: (id: string, amount: number) =>
+      `/customers/${id}/can-use-credit?amount=${amount}`,
   },
   SALES: {
     BASE: '/sales',
@@ -106,6 +107,7 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refreshToken',
   THEME: 'theme',
   SIDEBAR: 'sidebar',
+  PWA_DISMISSED: 'smartbiz_pwa_dismissed',
 } as const;
 
 export const ROLES = {

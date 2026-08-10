@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Menu, Moon, Sun, Bell, Search, LogOut, User, ChevronDown, Shield, Store } from 'lucide-react';
+import {
+  Menu,
+  Moon,
+  Sun,
+  Monitor,
+  Bell,
+  Search,
+  LogOut,
+  User,
+  ChevronDown,
+  Shield,
+  Store,
+  Download,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,18 +33,21 @@ import { useUIStore } from '@/stores/ui-store';
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { useLogout } from '@/features/auth/hooks/use-auth';
 import { ROLE_LABELS } from '@/lib/constants';
+import { usePwaInstall } from '@/hooks/use-pwa-install';
 
 export function Navbar() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const isOnline = useOnlineStatus();
   const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
   const { user } = useAuthStore();
   const logout = useLogout();
   const [searchQuery, setSearchQuery] = useState('');
+  const { isStandalone, promptInstall } = usePwaInstall();
 
-  const userInitials = user
-    ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
-    : '?';
+  const userInitials =
+    user && user.firstName
+      ? `${user.firstName[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
+      : null;
 
   return (
     <TooltipProvider>
@@ -86,24 +102,61 @@ export function Navbar() {
             <TooltipContent>Notifications</TooltipContent>
           </Tooltip>
 
-          {/* Theme Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</TooltipContent>
-          </Tooltip>
+          {/* Theme Toggle Dropdown */}
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Change theme">
+                    {theme === 'dark' && <Moon className="h-5 w-5" />}
+                    {theme === 'light' && <Sun className="h-5 w-5" />}
+                    {theme === 'system' && <Monitor className="h-5 w-5" />}
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Theme</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                <Sun className="mr-2 h-4 w-4" />
+                <span>Light</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                <Moon className="mr-2 h-4 w-4" />
+                <span>Dark</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                <Monitor className="mr-2 h-4 w-4" />
+                <span>System</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Install App Icon (Always visible so users can discover it) */}
+          {!isStandalone && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Install App"
+                  onClick={promptInstall}
+                >
+                  <Download className="h-5 w-5 text-primary" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Install SmartBiz</TooltipContent>
+            </Tooltip>
+          )}
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="User menu"
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-7 w-7">
                   <AvatarImage
                     src={
                       user?.email
@@ -112,7 +165,13 @@ export function Navbar() {
                     }
                     alt={user ? `${user.firstName} ${user.lastName}` : 'User'}
                   />
-                  <AvatarFallback>{userInitials}</AvatarFallback>
+                  <AvatarFallback className="bg-muted">
+                    {userInitials ? (
+                      userInitials
+                    ) : (
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
                   <span className="text-sm font-medium leading-tight">

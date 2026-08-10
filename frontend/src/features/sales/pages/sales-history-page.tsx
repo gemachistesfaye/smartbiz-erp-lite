@@ -15,7 +15,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSales } from '../hooks/use-sales';
 import { formatCurrency } from '@/lib/utils';
-import { Package } from 'lucide-react';
 
 export function SalesHistoryPage() {
   const [search, setSearch] = useState('');
@@ -100,11 +99,20 @@ export function SalesHistoryPage() {
             placeholder="Search sales..."
             className="pl-9"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={paymentMethod} onValueChange={(v) => { setPaymentMethod(v === 'all' ? '' : v); setPage(1); }}>
+          <Select
+            value={paymentMethod}
+            onValueChange={(v) => {
+              setPaymentMethod(v === 'all' ? '' : v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All Payment Methods" />
             </SelectTrigger>
@@ -114,7 +122,13 @@ export function SalesHistoryPage() {
               <SelectItem value="CREDIT">Credit</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={status} onValueChange={(v) => { setStatus(v === 'all' ? '' : v); setPage(1); }}>
+          <Select
+            value={status}
+            onValueChange={(v) => {
+              setStatus(v === 'all' ? '' : v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -131,9 +145,7 @@ export function SalesHistoryPage() {
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <Receipt className="h-12 w-12 text-muted-foreground/50" />
           <h3 className="mt-4 text-lg font-semibold">No sales found</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Start a new sale to see it here.
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Start a new sale to see it here.</p>
           <Link to="/pos" className="mt-4">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -146,14 +158,30 @@ export function SalesHistoryPage() {
           <table className="w-full caption-bottom text-sm">
             <thead className="border-b">
               <tr>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Sale #</th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Customer</th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
-                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Total</th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Cashier</th>
-                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Sale #
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Date
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Customer
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Type
+                </th>
+                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                  Total
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Status
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Cashier
+                </th>
+                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -167,7 +195,9 @@ export function SalesHistoryPage() {
                 ))
               ) : sales.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="h-24 text-center text-muted-foreground">No sales found.</td>
+                  <td colSpan={8} className="h-24 text-center text-muted-foreground">
+                    No sales found.
+                  </td>
                 </tr>
               ) : (
                 sales.map((sale) => (
@@ -175,18 +205,26 @@ export function SalesHistoryPage() {
                     <td className="p-4 font-medium">{sale.saleNumber}</td>
                     <td className="p-4">{new Date(sale.createdAt).toLocaleDateString()}</td>
                     <td className="p-4">
-                      {sale.customer ? `${sale.customer.firstName} ${sale.customer.lastName || ''}`.trim() : 'Walk-in'}
+                      {sale.customer
+                        ? `${sale.customer.firstName} ${sale.customer.lastName || ''}`.trim()
+                        : 'Walk-in'}
                     </td>
                     <td className="p-4">{getTypeBadge(sale.paymentMethod)}</td>
-                    <td className="p-4 text-right font-medium">{formatCurrency(sale.totalAmount)}</td>
+                    <td className="p-4 text-right font-medium">
+                      {formatCurrency(sale.totalAmount)}
+                    </td>
                     <td className="p-4">{getStatusBadge(sale.status)}</td>
                     <td className="p-4">
-                      {sale.cashier ? `${sale.cashier.firstName} ${sale.cashier.lastName}`.trim() : '-'}
+                      {sale.cashier
+                        ? `${sale.cashier.firstName} ${sale.cashier.lastName}`.trim()
+                        : '-'}
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link to="/sales/$saleId" params={{ saleId: sale.id }}>
-                          <Button variant="ghost" size="sm">View</Button>
+                          <Button variant="ghost" size="sm">
+                            View
+                          </Button>
                         </Link>
                       </div>
                     </td>
@@ -204,10 +242,20 @@ export function SalesHistoryPage() {
             Page {data.meta.page} of {data.meta.totalPages} ({data.meta.total} items)
           </p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
               Previous
             </Button>
-            <Button variant="outline" size="sm" disabled={page >= data.meta.totalPages} onClick={() => setPage(page + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= data.meta.totalPages}
+              onClick={() => setPage(page + 1)}
+            >
               Next
             </Button>
           </div>

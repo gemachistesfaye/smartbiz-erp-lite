@@ -5,7 +5,9 @@ import { vi } from 'vitest';
 import { RegisterForm } from '@/features/auth/components/register-form';
 
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: any) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
   useNavigate: () => vi.fn(),
 }));
 
@@ -16,11 +18,7 @@ const renderWithProviders = (component: React.ReactNode) => {
     },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>,
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 };
 
 describe('RegisterForm', () => {
@@ -31,7 +29,7 @@ describe('RegisterForm', () => {
     expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
   });
@@ -42,7 +40,7 @@ describe('RegisterForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/business name is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/business name must be at least 2 characters/i)).toBeInTheDocument();
       expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
       expect(screen.getByText(/last name is required/i)).toBeInTheDocument();
       expect(screen.getByText(/please enter a valid email/i)).toBeInTheDocument();

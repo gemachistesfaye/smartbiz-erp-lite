@@ -1,16 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createRouter, createRoute, createRootRoute, createMemoryHistory } from '@tanstack/react-router';
 import { CategoryForm } from '@/features/categories/components/category-form';
 
 const renderWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>,
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 };
 
 describe('CategoryForm', () => {

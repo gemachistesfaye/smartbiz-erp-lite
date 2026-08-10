@@ -18,6 +18,8 @@ import {
   SlidersHorizontal,
   Banknote,
   ShieldCheck,
+  User,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,6 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIStore } from '@/stores/ui-store';
 import { useAuthStore } from '@/features/auth/store/auth-store';
+import { useLogout } from '@/features/auth/hooks/use-auth';
 
 const navSections = [
   {
@@ -59,13 +62,15 @@ const navSections = [
   },
 ];
 
-const adminNavigation = [
-  { name: 'Business Settings', href: '/settings', icon: Settings },
-  { name: 'User Management', href: '/users', icon: ShieldCheck },
+const systemNavigation = [
+  { name: 'Help & Support', href: '/help', icon: HelpCircle },
+  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'User Management', href: '/users', icon: ShieldCheck, adminOnly: true },
 ];
 
-const supportNavigation = [
-  { name: 'Help & Support', href: '/help', icon: HelpCircle },
+const accountNavigation = [
+  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Logout', href: '#', icon: LogOut, action: 'logout' },
 ];
 
 function SidebarNavItem({
@@ -116,6 +121,7 @@ export function Sidebar() {
   const matchRoute = useMatchRoute();
   const { sidebarOpen, setSidebarOpen, sidebarCollapsed, toggleSidebar } = useUIStore();
   const { user } = useAuthStore();
+  const logout = useLogout();
   const isOwner = user?.role === 'OWNER';
 
   return (
@@ -185,7 +191,7 @@ export function Sidebar() {
                   <SidebarNavItem
                     key={item.name}
                     item={item}
-                    isActive={isActive}
+                    isActive={!!isActive}
                     sidebarCollapsed={sidebarCollapsed}
                     onClick={() => setSidebarOpen(false)}
                   />
@@ -195,44 +201,53 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* Bottom System Area */}
+        {/* Bottom System & Account Area */}
         <div className="mt-auto shrink-0 p-2">
           <Separator className="mb-2" />
+
+          {/* System */}
           {!sidebarCollapsed && (
             <p className="px-3 pt-2 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-              Administration
+              System
             </p>
           )}
           {sidebarCollapsed && <div className="my-2 h-px bg-border" />}
-          {adminNavigation
-            .filter((item) => item.name !== 'User Management' || isOwner)
+          {systemNavigation
+            .filter((item) => !item.adminOnly || isOwner)
             .map((item) => {
               const isActive = matchRoute({ to: item.href });
               return (
                 <SidebarNavItem
                   key={item.name}
                   item={item}
-                  isActive={isActive}
+                  isActive={!!isActive}
                   sidebarCollapsed={sidebarCollapsed}
                   onClick={() => setSidebarOpen(false)}
                 />
               );
             })}
+
+          {/* Account */}
           {!sidebarCollapsed && (
             <p className="px-3 pt-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-              Support
+              Account
             </p>
           )}
           {sidebarCollapsed && <div className="my-2 h-px bg-border" />}
-          {supportNavigation.map((item) => {
-            const isActive = matchRoute({ to: item.href });
+          {accountNavigation.map((item) => {
+            const isActive = item.href !== '#' && matchRoute({ to: item.href });
             return (
               <SidebarNavItem
                 key={item.name}
                 item={item}
-                isActive={isActive}
+                isActive={isActive as boolean}
                 sidebarCollapsed={sidebarCollapsed}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  if (item.action === 'logout') {
+                    logout.mutate();
+                  }
+                }}
               />
             );
           })}

@@ -1,22 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
 import { ProductForm } from '@/features/products/components/product-form';
-
-const createTestRouter = (component: React.ReactNode) => {
-  const rootRoute = createRootRoute({ component: () => component });
-  const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/' });
-  return createRouter({ routeTree: rootRoute.addChildren([indexRoute]) });
-};
 
 const renderWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>,
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 };
 
 describe('ProductForm', () => {

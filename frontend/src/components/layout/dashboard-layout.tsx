@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation } from '@tanstack/react-router';
 import { ChevronRight, Home } from 'lucide-react';
 import { Sidebar } from './sidebar';
 import { Navbar } from './navbar';
+import { PwaInstallPrompt } from './pwa-install-prompt';
 import { useUIStore } from '@/stores/ui-store';
 import { useIsDesktop } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
@@ -70,6 +71,7 @@ export function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      <PwaInstallPrompt />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from '@/components/dashboard/charts';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import {
@@ -92,9 +93,7 @@ export function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Unable to load dashboard data.
-          </p>
+          <p className="text-muted-foreground mt-1">Unable to load dashboard data.</p>
         </div>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -163,17 +162,16 @@ export function DashboardPage() {
             ? `${data.customerCreditSummary.customerCount} customers`
             : '0 customers',
           icon: CreditCard,
-          trend: overview?.outstandingCredit
-            ? { value: 0, isPositive: false }
-            : undefined,
+          trend: overview?.outstandingCredit ? { value: 0, isPositive: false } : undefined,
         },
       ];
 
-  const salesTrendData = data?.salesTrend?.map((d) => ({
-    name: d.day,
-    sales: d.sales,
-    expenses: d.expenses,
-  })) || [];
+  const salesTrendData =
+    data?.salesTrend?.map((d) => ({
+      name: d.day,
+      sales: d.sales,
+      expenses: d.expenses,
+    })) || [];
 
   const monthlyRevenueData = (() => {
     if (!data?.salesTrend?.length) return [];
@@ -184,22 +182,23 @@ export function DashboardPage() {
     });
     return Array.from(monthlyMap.entries()).map(([key, value]) => {
       const [y, m] = key.split('-');
-      const monthName = new Date(Number(y), Number(m) - 1).toLocaleString('default', { month: 'short' });
+      const monthName = new Date(Number(y), Number(m) - 1).toLocaleString('default', {
+        month: 'short',
+      });
       return { name: monthName, revenue: value };
     });
   })();
 
-  const inventoryChartData = data?.inventorySummary?.map((c) => ({
-    name: c.name,
-    value: c.totalStock,
-  })) || [];
+  const inventoryChartData =
+    data?.inventorySummary?.map((c) => ({
+      name: c.name,
+      value: c.totalStock,
+    })) || [];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Welcome back, {displayName}
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight">Welcome back, {displayName}</h1>
         <p className="text-muted-foreground mt-1">
           Here's what's happening with your business today.
         </p>
@@ -223,11 +222,7 @@ export function DashboardPage() {
       <div>
         <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <QuickActionCard
-            label="New Sale"
-            icon={Plus}
-            onClick={() => navigate({ to: '/pos' })}
-          />
+          <QuickActionCard label="New Sale" icon={Plus} onClick={() => navigate({ to: '/pos' })} />
           <QuickActionCard
             label="Add Product"
             icon={PackagePlus}
@@ -247,26 +242,17 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Sales Trend"
-          description="Daily sales vs expenses this week"
-        >
+        <ChartCard title="Sales Trend" description="Daily sales vs expenses this week">
           {isLoading ? <ChartSkeleton /> : <SalesTrendChart data={salesTrendData} />}
         </ChartCard>
 
-        <ChartCard
-          title="Monthly Revenue"
-          description="Revenue over recent months"
-        >
+        <ChartCard title="Monthly Revenue" description="Revenue over recent months">
           {isLoading ? <ChartSkeleton /> : <RevenueChart data={monthlyRevenueData} />}
         </ChartCard>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Inventory Distribution"
-          description="By category"
-        >
+        <ChartCard title="Inventory Distribution" description="By category">
           {isLoading ? (
             <ChartSkeleton />
           ) : inventoryChartData.length === 0 ? (
@@ -289,9 +275,7 @@ export function DashboardPage() {
             <div className="space-y-3">
               {data.topSellingProducts.map((product, index) => (
                 <div key={product.id} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-muted-foreground w-5">
-                    {index + 1}
-                  </span>
+                  <span className="text-sm font-medium text-muted-foreground w-5">{index + 1}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{product.name}</p>
                     <p className="text-xs text-muted-foreground">{product.category}</p>
@@ -308,11 +292,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <TableCard
-          title="Recent Sales"
-          description="Latest transactions"
-          viewAllLink="/sales"
-        >
+        <TableCard title="Recent Sales" description="Latest transactions" viewAllLink="/sales">
           {isLoading ? (
             <TableSkeleton />
           ) : !data?.recentSales?.length ? (
@@ -327,9 +307,7 @@ export function DashboardPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{sale.customer}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(sale.createdAt)}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{formatDate(sale.createdAt)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">{formatCurrency(sale.amount)}</p>
@@ -346,10 +324,7 @@ export function DashboardPage() {
           )}
         </TableCard>
 
-        <TableCard
-          title="Recent Activity"
-          description="Latest actions in your store"
-        >
+        <TableCard title="Recent Activity" description="Latest actions in your store">
           {isLoading ? (
             <TableSkeleton />
           ) : !data?.activityFeed?.length ? (
