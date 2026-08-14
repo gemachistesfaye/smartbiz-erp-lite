@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
@@ -14,6 +15,15 @@ export class SalesService {
   async createSale(businessId: string, userId: string, dto: CreateSaleDto) {
     if (dto.paymentMethod === 'CREDIT' && !dto.customerId) {
       throw new BadRequestException('Customer is required for credit sales');
+    }
+
+    if (dto.clientId) {
+      const existing = await this.prisma.sale.findUnique({
+        where: { businessId_clientId: { businessId, clientId: dto.clientId } },
+      });
+      if (existing) {
+        return this.findById(existing.id, businessId);
+      }
     }
 
     const today = new Date();
@@ -99,6 +109,7 @@ export class SalesService {
           totalAmount,
           status: 'COMPLETED',
           notes: dto.notes || null,
+          clientId: dto.clientId || null,
         },
       });
 

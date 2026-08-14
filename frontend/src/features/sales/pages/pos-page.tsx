@@ -30,6 +30,7 @@ import { useProducts } from '@/features/products/hooks/use-products';
 import { useActiveCustomers } from '@/features/customers/hooks/use-customers';
 import { useCreateSale } from '@/features/sales/hooks/use-sales';
 import { formatCurrency } from '@/lib/utils';
+import { Receipt } from '@/components/shared/receipt';
 import type { Product, Customer, Sale } from '@/types/models';
 
 interface CartItem {
@@ -590,7 +591,7 @@ export function PosPage() {
       </Dialog>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -598,16 +599,7 @@ export function PosPage() {
             </DialogTitle>
           </DialogHeader>
           {completedSale && (
-            <div className="space-y-3 text-center py-4">
-              <p className="text-sm text-muted-foreground">Sale Number</p>
-              <p className="text-xl font-bold">{completedSale.saleNumber}</p>
-              <p className="text-3xl font-bold">{formatCurrency(completedSale.totalAmount)}</p>
-              {completedSale.paymentMethod === 'CREDIT' && completedSale.customer && (
-                <p className="text-sm text-muted-foreground">
-                  Credit sale for {getCustomerName(completedSale.customer as Customer)}
-                </p>
-              )}
-            </div>
+            <Receipt sale={completedSale} />
           )}
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowSuccessDialog(false)}>

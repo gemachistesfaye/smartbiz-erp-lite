@@ -509,6 +509,7 @@ model Sale {
   changeAmount    Decimal?      @db.Decimal(12, 2)
   status          SaleStatus    @default(COMPLETED)
   notes           String?       @db.Text
+  clientId        String?       @db.VarChar(100)
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -517,6 +518,7 @@ model Sale {
   payments Payment[]
 
   @@unique([businessId, saleNumber])
+  @@unique([businessId, clientId])
   @@index([businessId])
   @@index([cashierId])
   @@index([customerId])

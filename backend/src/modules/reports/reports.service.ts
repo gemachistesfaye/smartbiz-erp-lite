@@ -66,6 +66,7 @@ export class ReportsService {
       totalCustomers,
       outstandingCredit,
       monthlyExpenses,
+      monthlyCogs,
     ] = await Promise.all([
       this.prisma.sale.aggregate({
         where: { businessId, status: 'COMPLETED', createdAt: { gte: start, lt: end } },
@@ -100,12 +101,26 @@ export class ReportsService {
         where: { businessId, date: { gte: monthStart, lt: monthEnd } },
         _sum: { amount: true },
       }),
+      this.prisma.saleItem.findMany({
+        where: {
+          sale: { businessId, status: 'COMPLETED', createdAt: { gte: monthStart, lt: monthEnd } },
+        },
+        select: {
+          quantity: true,
+          product: { select: { buyingPrice: true } },
+        },
+      }).then((items) =>
+        items.reduce((sum, item) => sum + (Number(item.product.buyingPrice) || 0) * item.quantity, 0),
+      ),
     ]);
 
     const lowStock = lowStockCount.filter((i) => i.quantity <= i.minThreshold).length;
     const monthlyRev = Number(monthlyRevenue._sum.totalAmount || 0);
     const lastMonthRev = Number(lastMonthRevenue._sum.totalAmount || 0);
     const expenses = Number(monthlyExpenses._sum.amount || 0);
+    const cogs = Number(monthlyCogs || 0);
+    const grossProfit = monthlyRev - cogs;
+    const netProfit = grossProfit - expenses;
 
     return {
       periodRevenue: Number(periodSales._sum.totalAmount || 0),
@@ -118,7 +133,9 @@ export class ReportsService {
       totalCustomers,
       outstandingCredit: Number(outstandingCredit._sum.creditBalance || 0),
       totalExpenses: expenses,
-      estimatedProfit: monthlyRev - expenses,
+      cogs,
+      grossProfit,
+      estimatedProfit: netProfit,
     };
   }
 
@@ -197,29 +214,40 @@ export class ReportsService {
   ) {
     const days = Math.ceil((end.getTime() - start.getTime()) / 86400000);
     const limit = Math.min(days, 90);
-    const trend: Array<{ date: string; revenue: number; sales: number }> = [];
 
     const saleWhereBase: any = {
       businessId,
       status: 'COMPLETED',
+      createdAt: { gte: start, lt: end },
     };
     if (filters.paymentMethod) saleWhereBase.paymentMethod = filters.paymentMethod;
 
+    const salesByDay = await this.prisma.sale.groupBy({
+      by: ['createdAt'],
+      where: saleWhereBase,
+      _sum: { totalAmount: true },
+      _count: true,
+    });
+
+    const salesMap = new Map<string, { revenue: number; count: number }>();
+    for (const item of salesByDay) {
+      const dateKey = new Date(item.createdAt).toISOString().slice(0, 10);
+      const existing = salesMap.get(dateKey) || { revenue: 0, count: 0 };
+      existing.revenue += Number(item._sum.totalAmount || 0);
+      existing.count += item._count;
+      salesMap.set(dateKey, existing);
+    }
+
+    const trend: Array<{ date: string; revenue: number; sales: number }> = [];
     for (let i = 0; i < limit; i++) {
-      const dayStart = new Date(start.getTime() + i * 86400000);
-      const dayEnd = new Date(dayStart.getTime() + 86400000);
-      if (dayStart >= end) break;
-
-      const result = await this.prisma.sale.aggregate({
-        where: { ...saleWhereBase, createdAt: { gte: dayStart, lt: dayEnd } },
-        _sum: { totalAmount: true },
-        _count: true,
-      });
-
+      const d = new Date(start.getTime() + i * 86400000);
+      if (d >= end) break;
+      const dateKey = d.toISOString().slice(0, 10);
+      const data = salesMap.get(dateKey);
       trend.push({
-        date: dayStart.toISOString().slice(0, 10),
-        revenue: Number(result._sum.totalAmount || 0),
-        sales: result._count,
+        date: dateKey,
+        revenue: data?.revenue || 0,
+        sales: data?.count || 0,
       });
     }
 
@@ -513,21 +541,27 @@ export class ReportsService {
   private async getExpensesTrendByRange(businessId: string, start: Date, end: Date) {
     const days = Math.ceil((end.getTime() - start.getTime()) / 86400000);
     const limit = Math.min(days, 90);
+
+    const expensesByDay = await this.prisma.expense.groupBy({
+      by: ['date'],
+      where: { businessId, date: { gte: start, lt: end } },
+      _sum: { amount: true },
+    });
+
+    const expensesMap = new Map<string, number>();
+    for (const item of expensesByDay) {
+      const dateKey = new Date(item.date).toISOString().slice(0, 10);
+      expensesMap.set(dateKey, (expensesMap.get(dateKey) || 0) + Number(item._sum.amount || 0));
+    }
+
     const trend: Array<{ date: string; amount: number }> = [];
-
     for (let i = 0; i < limit; i++) {
-      const dayStart = new Date(start.getTime() + i * 86400000);
-      const dayEnd = new Date(dayStart.getTime() + 86400000);
-      if (dayStart >= end) break;
-
-      const result = await this.prisma.expense.aggregate({
-        where: { businessId, date: { gte: dayStart, lt: dayEnd } },
-        _sum: { amount: true },
-      });
-
+      const d = new Date(start.getTime() + i * 86400000);
+      if (d >= end) break;
+      const dateKey = d.toISOString().slice(0, 10);
       trend.push({
-        date: dayStart.toISOString().slice(0, 10),
-        amount: Number(result._sum.amount || 0),
+        date: dateKey,
+        amount: expensesMap.get(dateKey) || 0,
       });
     }
 
@@ -539,7 +573,7 @@ export class ReportsService {
   async getProfitability(businessId: string, filters: ReportFilterDto) {
     const { start, end } = this.resolveDateRange(filters);
 
-    const [salesResult, expensesResult] = await Promise.all([
+    const [salesResult, expensesResult, saleItems] = await Promise.all([
       this.prisma.sale.aggregate({
         where: { businessId, status: 'COMPLETED', createdAt: { gte: start, lt: end } },
         _sum: { totalAmount: true },
@@ -548,16 +582,36 @@ export class ReportsService {
         where: { businessId, date: { gte: start, lt: end } },
         _sum: { amount: true },
       }),
+      this.prisma.saleItem.findMany({
+        where: {
+          sale: { businessId, status: 'COMPLETED', createdAt: { gte: start, lt: end } },
+        },
+        select: {
+          quantity: true,
+          product: { select: { buyingPrice: true } },
+        },
+      }),
     ]);
 
     const revenue = Number(salesResult._sum.totalAmount || 0);
     const expenses = Number(expensesResult._sum.amount || 0);
 
+    const cogs = saleItems.reduce((sum, item) => {
+      const cost = Number(item.product.buyingPrice) || 0;
+      return sum + cost * item.quantity;
+    }, 0);
+
+    const grossProfit = revenue - cogs;
+    const netProfit = grossProfit - expenses;
+
     return {
       revenue,
+      cogs,
+      grossProfit,
       expenses,
-      estimatedProfit: revenue - expenses,
+      netProfit,
       hasExpenseData: expenses > 0,
+      hasCostData: cogs > 0,
     };
   }
 
@@ -614,29 +668,52 @@ export class ReportsService {
   private async getSalesTrend(businessId: string) {
     const now = new Date();
     const days = 7;
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1));
+    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const [salesByDay, expensesByDay] = await Promise.all([
+      this.prisma.sale.groupBy({
+        by: ['createdAt'],
+        where: {
+          businessId,
+          status: 'COMPLETED',
+          createdAt: { gte: dayStart, lt: dayEnd },
+        },
+        _sum: { totalAmount: true },
+      }),
+      this.prisma.expense.groupBy({
+        by: ['date'],
+        where: {
+          businessId,
+          date: { gte: dayStart, lt: dayEnd },
+        },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const salesMap = new Map<string, number>();
+    for (const item of salesByDay) {
+      const dateKey = new Date(item.createdAt).toISOString().slice(0, 10);
+      salesMap.set(dateKey, (salesMap.get(dateKey) || 0) + Number(item._sum.totalAmount || 0));
+    }
+
+    const expensesMap = new Map<string, number>();
+    for (const item of expensesByDay) {
+      const dateKey = new Date(item.date).toISOString().slice(0, 10);
+      expensesMap.set(dateKey, (expensesMap.get(dateKey) || 0) + Number(item._sum.amount || 0));
+    }
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const trend: Array<{ date: string; day: string; sales: number; expenses: number }> = [];
 
     for (let i = days - 1; i >= 0; i--) {
-      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i + 1);
-
-      const [salesResult, expensesResult] = await Promise.all([
-        this.prisma.sale.aggregate({
-          where: { businessId, status: 'COMPLETED', createdAt: { gte: dayStart, lt: dayEnd } },
-          _sum: { totalAmount: true },
-        }),
-        this.prisma.expense.aggregate({
-          where: { businessId, date: { gte: dayStart, lt: dayEnd } },
-          _sum: { amount: true },
-        }),
-      ]);
-
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const dateKey = d.toISOString().slice(0, 10);
       trend.push({
-        date: dayStart.toISOString().slice(0, 10),
-        day: dayNames[dayStart.getDay()],
-        sales: Number(salesResult._sum.totalAmount || 0),
-        expenses: Number(expensesResult._sum.amount || 0),
+        date: dateKey,
+        day: dayNames[d.getDay()],
+        sales: salesMap.get(dateKey) || 0,
+        expenses: expensesMap.get(dateKey) || 0,
       });
     }
 

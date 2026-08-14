@@ -45,6 +45,12 @@ export class CreateSaleDto {
   @MaxLength(500)
   notes?: string;
 
+  @ApiPropertyOptional({ description: 'Client-generated unique ID for idempotency (offline sales)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  clientId?: string;
+
   @ApiProperty({ type: [CreateSaleItemDto], description: 'Sale items (at least 1 required)' })
   @IsArray()
   @ArrayMinSize(1)

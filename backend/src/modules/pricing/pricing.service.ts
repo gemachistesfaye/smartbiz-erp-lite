@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 
 export interface PricingInput {
   buyingPrice: number;
@@ -42,32 +42,51 @@ export interface PricingBreakdown {
 
 @Injectable()
 export class PricingService {
+  private sanitizeInput(input: PricingInput): PricingInput {
+    return {
+      buyingPrice: Math.max(0, Number(input.buyingPrice) || 0),
+      quantityPurchased: Math.max(1, Math.floor(Number(input.quantityPurchased) || 1)),
+      transportationCost: Math.max(0, Number(input.transportationCost) || 0),
+      loadingCost: Math.max(0, Number(input.loadingCost) || 0),
+      packagingCost: Math.max(0, Number(input.packagingCost) || 0),
+      storageCost: Math.max(0, Number(input.storageCost) || 0),
+      laborCost: Math.max(0, Number(input.laborCost) || 0),
+      customsCost: Math.max(0, Number(input.customsCost) || 0),
+      otherCosts: Math.max(0, Number(input.otherCosts) || 0),
+      vatPercentage: Math.max(0, Math.min(100, Number(input.vatPercentage) || 0)),
+      profitPercentage: Math.max(0, Number(input.profitPercentage) || 0),
+      sellingPrice: input.sellingPrice ? Math.max(0, Number(input.sellingPrice)) : undefined,
+      manualSellingPrice: input.manualSellingPrice,
+    };
+  }
+
   calculatePricing(input: PricingInput): PricingBreakdown {
-    const qty = Math.max(input.quantityPurchased, 1);
+    const sanitized = this.sanitizeInput(input);
+    const qty = sanitized.quantityPurchased;
 
     const totalAdditionalCosts =
-      input.transportationCost +
-      input.loadingCost +
-      input.packagingCost +
-      input.storageCost +
-      input.laborCost +
-      input.customsCost +
-      input.otherCosts;
+      sanitized.transportationCost +
+      sanitized.loadingCost +
+      sanitized.packagingCost +
+      sanitized.storageCost +
+      sanitized.laborCost +
+      sanitized.customsCost +
+      sanitized.otherCosts;
 
-    const totalCost = input.buyingPrice + totalAdditionalCosts;
+    const totalCost = sanitized.buyingPrice + totalAdditionalCosts;
     const costPerUnit = totalCost / qty;
 
-    const vatAmountPerUnit = costPerUnit * (input.vatPercentage / 100);
+    const vatAmountPerUnit = costPerUnit * (sanitized.vatPercentage / 100);
     const costPlusVat = costPerUnit + vatAmountPerUnit;
 
     let recommendedSellingPrice: number;
     let expectedProfitPerUnit: number;
 
-    if (input.manualSellingPrice && input.sellingPrice && input.sellingPrice > 0) {
-      recommendedSellingPrice = input.sellingPrice;
+    if (sanitized.manualSellingPrice && sanitized.sellingPrice && sanitized.sellingPrice > 0) {
+      recommendedSellingPrice = sanitized.sellingPrice;
       expectedProfitPerUnit = recommendedSellingPrice - costPlusVat;
     } else {
-      const profitAmountPerUnit = costPlusVat * (input.profitPercentage / 100);
+      const profitAmountPerUnit = costPlusVat * (sanitized.profitPercentage / 100);
       recommendedSellingPrice = costPlusVat + profitAmountPerUnit;
       expectedProfitPerUnit = profitAmountPerUnit;
     }
@@ -76,30 +95,30 @@ export class PricingService {
       costPlusVat > 0 ? (expectedProfitPerUnit / costPlusVat) * 100 : 0;
 
     const explanation = this.buildExplanation({
-      buyingPrice: input.buyingPrice,
+      buyingPrice: sanitized.buyingPrice,
       qty,
       totalAdditionalCosts,
       totalCost,
       costPerUnit,
       vatAmountPerUnit,
-      profitPercentage: input.profitPercentage,
+      profitPercentage: sanitized.profitPercentage,
       recommendedSellingPrice,
       expectedProfitPerUnit,
-      manualSellingPrice: input.manualSellingPrice || false,
+      manualSellingPrice: sanitized.manualSellingPrice || false,
       costBreakdown: {
-        transportationCost: input.transportationCost,
-        loadingCost: input.loadingCost,
-        packagingCost: input.packagingCost,
-        storageCost: input.storageCost,
-        laborCost: input.laborCost,
-        customsCost: input.customsCost,
-        otherCosts: input.otherCosts,
+        transportationCost: sanitized.transportationCost,
+        loadingCost: sanitized.loadingCost,
+        packagingCost: sanitized.packagingCost,
+        storageCost: sanitized.storageCost,
+        laborCost: sanitized.laborCost,
+        customsCost: sanitized.customsCost,
+        otherCosts: sanitized.otherCosts,
         subtotal: totalAdditionalCosts,
       },
     });
 
     return {
-      buyingPrice: input.buyingPrice,
+      buyingPrice: sanitized.buyingPrice,
       quantityPurchased: qty,
       totalAdditionalCosts,
       totalCost,

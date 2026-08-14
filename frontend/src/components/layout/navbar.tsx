@@ -26,18 +26,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/hooks/use-theme';
-import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useUIStore } from '@/stores/ui-store';
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { useLogout } from '@/features/auth/hooks/use-auth';
 import { ROLE_LABELS } from '@/lib/constants';
 import { usePwaInstall } from '@/hooks/use-pwa-install';
+import { ConnectivityStatus } from '@/components/shared/connectivity-status';
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
-  const isOnline = useOnlineStatus();
   const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
   const { user } = useAuthStore();
   const logout = useLogout();
@@ -87,10 +85,10 @@ export function Navbar() {
 
         {/* Right zone: Status, Notifications, Theme, Profile */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          {/* Online/Offline Status */}
-          <Badge variant={isOnline ? 'default' : 'destructive'} className="hidden sm:inline-flex">
-            {isOnline ? 'Online' : 'Offline'}
-          </Badge>
+          {/* Connectivity Status */}
+          <div className="hidden sm:block">
+            <ConnectivityStatus />
+          </div>
 
           {/* Notifications */}
           <Tooltip>

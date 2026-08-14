@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Receipt, Plus, DollarSign, Search } from 'lucide-react';
+import { Receipt, Plus, DollarSign, Search, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,17 +15,45 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSales } from '../hooks/use-sales';
 import { formatCurrency } from '@/lib/utils';
+import { exportSalesToCSV } from '@/lib/csv-export';
 
 export function SalesHistoryPage() {
   const [search, setSearch] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [status, setStatus] = useState('');
+  const [dateRange, setDateRange] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [page, setPage] = useState(1);
+
+  const getDateRangeParams = () => {
+    if (dateRange === 'custom' && startDate && endDate) {
+      return { startDate, endDate };
+    }
+    if (dateRange && dateRange !== 'custom') {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      switch (dateRange) {
+        case 'today':
+          return { startDate: todayStart.toISOString(), endDate: new Date(todayStart.getTime() + 86400000).toISOString() };
+        case 'week': {
+          const weekStart = new Date(todayStart.getTime() - 6 * 86400000);
+          return { startDate: weekStart.toISOString(), endDate: new Date(todayStart.getTime() + 86400000).toISOString() };
+        }
+        case 'month': {
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          return { startDate: monthStart.toISOString(), endDate: new Date(todayStart.getTime() + 86400000).toISOString() };
+        }
+      }
+    }
+    return {};
+  };
 
   const { data, isLoading } = useSales({
     search,
     paymentMethod: paymentMethod || undefined,
     status: status || undefined,
+    ...getDateRangeParams(),
     page,
     limit: 20,
   });
@@ -58,12 +86,44 @@ export function SalesHistoryPage() {
           <h1 className="text-2xl font-bold tracking-tight">Sales</h1>
           <p className="text-muted-foreground">View and manage sales transactions</p>
         </div>
-        <Link to="/pos">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Sale
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          {sales.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() =>
+                exportSalesToCSV(
+                  sales.map((s) => ({
+                    saleNumber: s.saleNumber,
+                    createdAt: s.createdAt,
+                    customer: s.customer
+                      ? `${s.customer.firstName} ${s.customer.lastName || ''}`
+                      : undefined,
+                    paymentMethod: s.paymentMethod,
+                    subtotal: Number(s.subtotal),
+                    discountAmount: Number(s.discountAmount),
+                    totalAmount: Number(s.totalAmount),
+                    status: s.status,
+                    items: s.items?.map((i) => ({
+                      productName: i.product?.name || '',
+                      quantity: i.quantity,
+                      unitPrice: Number(i.unitPrice),
+                      totalPrice: Number(i.totalPrice),
+                    })),
+                  })),
+                )
+              }
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          )}
+          <Link to="/pos">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Sale
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -106,6 +166,40 @@ export function SalesHistoryPage() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={dateRange}
+            onValueChange={(v) => {
+              setDateRange(v === 'all' ? '' : v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Time" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="custom">Custom Range</SelectItem>
+            </SelectContent>
+          </Select>
+          {dateRange === 'custom' && (
+            <>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                className="w-[140px]"
+              />
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                className="w-[140px]"
+              />
+            </>
+          )}
           <Select
             value={paymentMethod}
             onValueChange={(v) => {
