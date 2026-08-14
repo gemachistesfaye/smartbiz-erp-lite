@@ -86,7 +86,7 @@ export function Navbar() {
         {/* Right zone: Status, Notifications, Theme, Profile */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Connectivity Status */}
-          <div className="hidden sm:block">
+          <div>
             <ConnectivityStatus />
           </div>
 

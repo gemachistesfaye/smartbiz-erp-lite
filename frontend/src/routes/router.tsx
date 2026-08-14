@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import {
   createRouter,
   createRoute,
@@ -10,6 +10,7 @@ import { useAuthStore } from '@/features/auth/store/auth-store';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { ServerErrorPage } from '@/components/shared/server-error-page';
+import { OfflinePage } from '@/components/shared/offline-page';
 
 function withSuspense(Component: React.LazyExoticComponent<React.ComponentType>) {
   return function SuspenseWrapper() {
@@ -162,8 +163,26 @@ const NotFoundPage = withSuspense(
   ),
 );
 
+function OfflineDetector() {
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  if (isOffline) return <OfflinePage />;
+  return <Outlet />;
+}
+
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: OfflineDetector,
   errorComponent: ({ error }) => (
     <ServerErrorPage message={error?.message || 'An unexpected error occurred.'} />
   ),
