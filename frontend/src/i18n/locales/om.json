@@ -211,6 +211,12 @@
     "phone": "Bilbila",
     "outstandingBalance": "Bankeessaa",
     "daysSinceLastCredit": "Guyaalee baasii keenna",
+    "dueDate": "Boota Karaa",
+    "daysOverdue": "Guyyaa Dandeenyu",
+    "status": "Haala",
+    "overdueBy": "Guyyaa {{days}} Dandeenyu",
+    "notYetDue": "Amma hin taane",
+    "saleCount": "Geejjibsa karooraa {{count}}",
     "action": "Gochaa",
     "sendReminder": "Barruu Ergi",
     "reminderSent": "Barruu ergame",
@@ -320,7 +326,9 @@
     "noSales": "Iyyatuu hin jiru.",
     "voidSale": "Iyyatuu Haqii",
     "saleDetails": "Bal'ina Iyyatuu",
-    "searchPlaceholder": "Iyyatuu waliigali..."
+    "searchPlaceholder": "Iyyatuu waliigali...",
+    "dueDate": "Boota Karaa",
+    "dueDateRequired": "Geejjibsa karooraf boota karaa barbaachisaadha"
   },
   "expenses": {
     "title": "Harcaa",

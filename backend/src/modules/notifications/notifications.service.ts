@@ -75,19 +75,36 @@ export class NotificationsService {
   }
 
   async checkOverdueReminders(businessId: string) {
-    const customers = await this.prisma.customer.findMany({
+    const now = new Date();
+
+    const overdueSales = await this.prisma.sale.findMany({
       where: {
         businessId,
-        deletedAt: null,
-        creditBalance: { gt: 0 },
+        paymentMethod: 'CREDIT',
+        status: 'COMPLETED',
+        dueDate: { lt: now },
+        customerId: { not: null },
       },
-      orderBy: { creditBalance: 'desc' },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            creditBalance: true,
+          },
+        },
+      },
     });
 
     const createdNotifications = [];
+    const processedCustomerIds = new Set<string>();
 
-    for (const customer of customers) {
-      // Check if a CREDIT_PAYMENT notification already exists in the last 7 days
+    for (const sale of overdueSales) {
+      if (!sale.customer || Number(sale.customer.creditBalance) <= 0) continue;
+      if (processedCustomerIds.has(sale.customerId!)) continue;
+      processedCustomerIds.add(sale.customerId!);
+
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -95,36 +112,21 @@ export class NotificationsService {
         where: {
           businessId,
           type: 'CREDIT_PAYMENT',
-          title: `Payment Reminder: ${customer.firstName} ${customer.lastName}`,
+          title: `Payment Reminder: ${sale.customer.firstName} ${sale.customer.lastName}`,
           createdAt: { gte: sevenDaysAgo },
         },
       });
 
-      if (existingNotification) {
-        continue;
-      }
+      if (existingNotification) continue;
 
-      // Find the latest credit sale for this customer
-      const latestSale = await this.prisma.sale.findFirst({
-        where: {
-          customerId: customer.id,
-          businessId,
-          paymentMethod: 'CREDIT',
-          status: 'COMPLETED',
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      if (!latestSale) {
-        continue;
-      }
+      const daysOverdue = Math.floor((now.getTime() - new Date(sale.dueDate!).getTime()) / (1000 * 60 * 60 * 24));
 
       const notification = await this.prisma.notification.create({
         data: {
           businessId,
           type: 'CREDIT_PAYMENT',
-          title: `Payment Reminder: ${customer.firstName} ${customer.lastName}`,
-          message: `Customer ${customer.firstName} ${customer.lastName} has an outstanding balance of ${customer.creditBalance} ETB`,
+          title: `Payment Reminder: ${sale.customer.firstName} ${sale.customer.lastName}`,
+          message: `Customer ${sale.customer.firstName} ${sale.customer.lastName} has an outstanding balance of ${sale.customer.creditBalance} ETB, overdue by ${daysOverdue} days (due: ${new Date(sale.dueDate!).toLocaleDateString()})`,
         },
       });
 
@@ -132,7 +134,7 @@ export class NotificationsService {
     }
 
     return {
-      checked: customers.length,
+      checked: processedCustomerIds.size,
       created: createdNotifications.length,
       notifications: createdNotifications,
     };

@@ -89,6 +89,7 @@ export function Invoice({ sale }: InvoiceProps) {
         amountTendered: sale.amountTendered,
         changeAmount: sale.changeAmount,
         status: sale.status,
+        dueDate: sale.dueDate,
       },
       businessInfo?.name
     );
@@ -199,7 +200,14 @@ export function Invoice({ sale }: InvoiceProps) {
           )}
           {sale.paymentMethod === 'CREDIT' && (
             <div className="credit-notice">
-              <strong>Credit Sale</strong> &mdash; Outstanding balance is due as per agreed terms.
+              <strong>Credit Sale</strong><br />
+              <span>Total: {formatCurrency(sale.totalAmount)}</span><br />
+              {sale.dueDate && (
+                <>
+                  <span>Due: {new Date(sale.dueDate).toLocaleDateString()}</span>
+                  <br />
+                </>
+              )}
             </div>
           )}
         </div>

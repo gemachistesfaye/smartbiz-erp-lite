@@ -82,6 +82,7 @@ export interface PendingSale {
   discountAmount: number;
   totalAmount: number;
   notes?: string;
+  dueDate?: string;
   status: 'PENDING' | 'SYNCING' | 'SYNCED' | 'FAILED' | 'CONFLICT';
   createdAt: string;
   syncedAt?: string;

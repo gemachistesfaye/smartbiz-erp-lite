@@ -197,6 +197,122 @@ describe('CustomersService', () => {
     });
   });
 
+  describe('getOverdueCustomers', () => {
+    it('should return customers with past-due credit sales', async () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 10);
+
+      mockPrisma.sale.findMany.mockResolvedValue([
+        {
+          id: 'sale-1',
+          customerId: 'cust-1',
+          totalAmount: 500,
+          dueDate: pastDate,
+          createdAt: new Date(),
+          customer: {
+            id: 'cust-1',
+            firstName: 'John',
+            lastName: 'Doe',
+            phone: '123',
+            email: null,
+            creditBalance: 500,
+            creditLimit: 1000,
+            status: 'ACTIVE',
+          },
+        },
+      ]);
+
+      const result = await service.getOverdueCustomers('biz-1');
+      expect(result).toHaveLength(1);
+      expect(result[0].daysOverdue).toBeGreaterThanOrEqual(10);
+      expect(result[0].outstandingBalance).toBe(500);
+      expect(result[0].saleCount).toBe(1);
+    });
+
+    it('should return empty for no overdue sales', async () => {
+      mockPrisma.sale.findMany.mockResolvedValue([]);
+      const result = await service.getOverdueCustomers('biz-1');
+      expect(result).toHaveLength(0);
+    });
+
+    it('should skip customers with zero credit balance', async () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 5);
+
+      mockPrisma.sale.findMany.mockResolvedValue([
+        {
+          id: 'sale-1',
+          customerId: 'cust-1',
+          totalAmount: 200,
+          dueDate: pastDate,
+          createdAt: new Date(),
+          customer: {
+            id: 'cust-1',
+            firstName: 'Jane',
+            lastName: 'Smith',
+            phone: '456',
+            email: null,
+            creditBalance: 0,
+            creditLimit: 500,
+            status: 'ACTIVE',
+          },
+        },
+      ]);
+
+      const result = await service.getOverdueCustomers('biz-1');
+      expect(result).toHaveLength(0);
+    });
+
+    it('should aggregate multiple overdue sales for same customer', async () => {
+      const pastDate1 = new Date();
+      pastDate1.setDate(pastDate1.getDate() - 15);
+      const pastDate2 = new Date();
+      pastDate2.setDate(pastDate2.getDate() - 5);
+
+      mockPrisma.sale.findMany.mockResolvedValue([
+        {
+          id: 'sale-1',
+          customerId: 'cust-1',
+          totalAmount: 300,
+          dueDate: pastDate2,
+          createdAt: new Date(),
+          customer: {
+            id: 'cust-1',
+            firstName: 'John',
+            lastName: 'Doe',
+            phone: '123',
+            email: null,
+            creditBalance: 800,
+            creditLimit: 1000,
+            status: 'ACTIVE',
+          },
+        },
+        {
+          id: 'sale-2',
+          customerId: 'cust-1',
+          totalAmount: 500,
+          dueDate: pastDate1,
+          createdAt: new Date(),
+          customer: {
+            id: 'cust-1',
+            firstName: 'John',
+            lastName: 'Doe',
+            phone: '123',
+            email: null,
+            creditBalance: 800,
+            creditLimit: 1000,
+            status: 'ACTIVE',
+          },
+        },
+      ]);
+
+      const result = await service.getOverdueCustomers('biz-1');
+      expect(result).toHaveLength(1);
+      expect(result[0].saleCount).toBe(2);
+      expect(result[0].daysOverdue).toBeGreaterThanOrEqual(15);
+    });
+  });
+
   describe('canUseCredit', () => {
     it('should return credit availability', async () => {
       mockPrisma.customer.findFirst.mockResolvedValue({

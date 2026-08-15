@@ -270,6 +270,9 @@ export function SalesHistoryPage() {
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Status
                 </th>
+                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                  Due Date
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Cashier
                 </th>
@@ -281,15 +284,15 @@ export function SalesHistoryPage() {
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b">
-                    <td colSpan={8} className="p-4">
-                      <Skeleton className="h-8 w-full" />
-                    </td>
+                <tr key={i} className="border-b">
+                      <td colSpan={9} className="p-4">
+                        <Skeleton className="h-8 w-full" />
+                      </td>
                   </tr>
                 ))
               ) : sales.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="h-24 text-center text-muted-foreground">
+                  <td colSpan={9} className="h-24 text-center text-muted-foreground">
                     No sales found.
                   </td>
                 </tr>
@@ -308,6 +311,11 @@ export function SalesHistoryPage() {
                       {formatCurrency(sale.totalAmount)}
                     </td>
                     <td className="p-4">{getStatusBadge(sale.status)}</td>
+                    <td className="p-4 text-right">
+                      {sale.paymentMethod === 'CREDIT' && sale.dueDate
+                        ? new Date(sale.dueDate).toLocaleDateString()
+                        : '-'}
+                    </td>
                     <td className="p-4">
                       {sale.cashier
                         ? `${sale.cashier.firstName} ${sale.cashier.lastName}`.trim()

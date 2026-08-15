@@ -363,6 +363,7 @@ export interface Sale {
   changeAmount?: number;
   status: 'COMPLETED' | 'VOIDED' | 'REFUNDED';
   notes?: string;
+  dueDate?: string;
   items: SaleItem[];
   payments?: Payment[];
   createdAt: string;

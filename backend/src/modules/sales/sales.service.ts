@@ -17,6 +17,19 @@ export class SalesService {
       throw new BadRequestException('Customer is required for credit sales');
     }
 
+    if (dto.paymentMethod === 'CREDIT' && !dto.dueDate) {
+      throw new BadRequestException('Due date is required for credit sales');
+    }
+
+    if (dto.dueDate) {
+      const dueDateObj = new Date(dto.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dueDateObj < today) {
+        throw new BadRequestException('Due date cannot be in the past');
+      }
+    }
+
     if (dto.clientId) {
       const existing = await this.prisma.sale.findUnique({
         where: { businessId_clientId: { businessId, clientId: dto.clientId } },
@@ -109,6 +122,7 @@ export class SalesService {
           totalAmount,
           status: 'COMPLETED',
           notes: dto.notes || null,
+          dueDate: dto.paymentMethod === 'CREDIT' && dto.dueDate ? new Date(dto.dueDate) : null,
           clientId: dto.clientId || null,
         },
       });

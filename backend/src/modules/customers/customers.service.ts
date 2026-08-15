@@ -497,15 +497,76 @@ export class CustomersService {
   }
 
   async getOverdueCustomers(businessId: string) {
-    const customers = await this.prisma.customer.findMany({
+    const now = new Date();
+    
+    const overdueSales = await this.prisma.sale.findMany({
       where: {
         businessId,
-        deletedAt: null,
-        creditBalance: { gt: 0 },
+        paymentMethod: 'CREDIT',
+        status: 'COMPLETED',
+        dueDate: { lt: now },
+        customerId: { not: null },
       },
-      orderBy: { creditBalance: 'desc' },
+      select: {
+        id: true,
+        customerId: true,
+        totalAmount: true,
+        dueDate: true,
+        createdAt: true,
+        customer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            email: true,
+            creditBalance: true,
+            creditLimit: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: { dueDate: 'asc' },
     });
 
-    return customers;
+    const customerMap = new Map<string, {
+      customer: typeof overdueSales[0]['customer'];
+      outstandingBalance: number;
+      earliestDueDate: Date;
+      daysOverdue: number;
+      saleCount: number;
+    }>();
+
+    for (const sale of overdueSales) {
+      if (!sale.customer || Number(sale.customer.creditBalance) <= 0) continue;
+      
+      const existing = customerMap.get(sale.customerId!);
+      const daysOverdue = Math.floor((now.getTime() - new Date(sale.dueDate!).getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (existing) {
+        existing.outstandingBalance = Number(sale.customer.creditBalance);
+        existing.saleCount++;
+        if (new Date(sale.dueDate!) < existing.earliestDueDate) {
+          existing.earliestDueDate = new Date(sale.dueDate!);
+          existing.daysOverdue = daysOverdue;
+        }
+      } else {
+        customerMap.set(sale.customerId!, {
+          customer: sale.customer,
+          outstandingBalance: Number(sale.customer.creditBalance),
+          earliestDueDate: new Date(sale.dueDate!),
+          daysOverdue,
+          saleCount: 1,
+        });
+      }
+    }
+
+    return Array.from(customerMap.values()).map((entry) => ({
+      ...entry.customer,
+      outstandingBalance: entry.outstandingBalance,
+      dueDate: entry.earliestDueDate.toISOString(),
+      daysOverdue: entry.daysOverdue,
+      saleCount: entry.saleCount,
+    }));
   }
 }

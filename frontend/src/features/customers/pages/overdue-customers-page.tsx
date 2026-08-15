@@ -57,7 +57,7 @@ export function OverdueCustomersPage() {
   const totalOutstanding = customers.reduce((sum, c) => sum + (c.outstandingBalance || 0), 0);
   const avgDaysOverdue =
     customers.length > 0
-      ? Math.round(customers.reduce((sum, c) => sum + (c.daysSinceLastCredit || 0), 0) / customers.length)
+      ? Math.round(customers.reduce((sum, c) => sum + (c.daysOverdue || 0), 0) / customers.length)
       : 0;
 
   const handleSendReminder = async (customer: OverdueCustomer) => {
@@ -149,7 +149,9 @@ export function OverdueCustomersPage() {
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">{t('overdue.customerName')}</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">{t('overdue.phone')}</th>
                     <th className="text-right py-3 px-2 font-medium text-muted-foreground">{t('overdue.outstandingBalance')}</th>
-                    <th className="text-right py-3 px-2 font-medium text-muted-foreground">{t('overdue.daysSinceLastCredit')}</th>
+                    <th className="text-right py-3 px-2 font-medium text-muted-foreground">{t('overdue.dueDate')}</th>
+                    <th className="text-right py-3 px-2 font-medium text-muted-foreground">{t('overdue.daysOverdue')}</th>
+                    <th className="text-right py-3 px-2 font-medium text-muted-foreground">{t('overdue.status')}</th>
                     <th className="text-right py-3 px-2 font-medium text-muted-foreground">{t('overdue.action')}</th>
                   </tr>
                 </thead>
@@ -170,8 +172,18 @@ export function OverdueCustomersPage() {
                         </Badge>
                       </td>
                       <td className="py-3 px-2 text-right">
-                        <Badge variant="outline">
-                          {customer.daysSinceLastCredit} days
+                        {customer.dueDate
+                          ? new Date(customer.dueDate).toLocaleDateString()
+                          : '-'}
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        <Badge variant={customer.daysOverdue > 30 ? 'destructive' : 'outline'}>
+                          {t('overdue.overdueBy', { days: customer.daysOverdue })}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        <Badge variant={customer.daysOverdue > 0 ? 'destructive' : 'default'}>
+                          {customer.daysOverdue > 0 ? 'Overdue' : t('overdue.notYetDue')}
                         </Badge>
                       </td>
                       <td className="py-3 px-2 text-right">

@@ -5,8 +5,9 @@ import type { Customer } from '@/types/models';
 
 export interface OverdueCustomer extends Customer {
   outstandingBalance: number;
-  daysSinceLastCredit: number;
-  lastCreditDate: string | null;
+  dueDate: string | null;
+  daysOverdue: number;
+  saleCount: number;
 }
 
 export function useOverdueCustomers() {

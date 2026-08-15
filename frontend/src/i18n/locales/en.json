@@ -211,6 +211,12 @@
     "phone": "Phone",
     "outstandingBalance": "Outstanding Balance",
     "daysSinceLastCredit": "Days Since Last Credit",
+    "dueDate": "Due Date",
+    "daysOverdue": "Days Overdue",
+    "status": "Status",
+    "overdueBy": "Overdue by {{days}} days",
+    "notYetDue": "Not yet due",
+    "saleCount": "{{count}} credit sale(s)",
     "action": "Action",
     "sendReminder": "Send Reminder",
     "reminderSent": "Reminder sent successfully",
@@ -320,7 +326,9 @@
     "noSales": "No sales yet.",
     "voidSale": "Void Sale",
     "saleDetails": "Sale Details",
-    "searchPlaceholder": "Search sales..."
+    "searchPlaceholder": "Search sales...",
+    "dueDate": "Due Date",
+    "dueDateRequired": "Due date is required for credit sales"
   },
   "expenses": {
     "title": "Expenses",

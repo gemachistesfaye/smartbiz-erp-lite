@@ -116,7 +116,7 @@ export function Receipt({ sale }: ReceiptProps) {
           <span className="bold">{sale.paymentMethod}</span>
         </div>
 
-        {sale.paymentMethod === 'CREDIT' && sale.customer && (
+          {sale.paymentMethod === 'CREDIT' && sale.customer && (
           <div className="mt-2 p-2 bg-gray-100 rounded">
             <div className="row bold">
               <span>Credit Sale</span>
@@ -125,6 +125,12 @@ export function Receipt({ sale }: ReceiptProps) {
               <span>Outstanding:</span>
               <span>{formatCurrency(Number((sale.customer as Record<string, unknown>)?.creditBalance || 0))}</span>
             </div>
+            {sale.dueDate && (
+              <div className="row">
+                <span>Due Date:</span>
+                <span>{new Date(sale.dueDate).toLocaleDateString()}</span>
+              </div>
+            )}
           </div>
         )}
 

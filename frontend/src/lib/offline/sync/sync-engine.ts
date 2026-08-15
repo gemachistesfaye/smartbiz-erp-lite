@@ -32,6 +32,7 @@ async function syncSale(sale: PendingSale): Promise<boolean> {
       customerId: sale.customerId,
       discountAmount: sale.discountAmount,
       notes: sale.notes,
+      dueDate: sale.dueDate,
       items: sale.items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,

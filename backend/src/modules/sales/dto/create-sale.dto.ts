@@ -45,6 +45,11 @@ export class CreateSaleDto {
   @MaxLength(500)
   notes?: string;
 
+  @ApiPropertyOptional({ description: 'Due date for credit sales (required for CREDIT payments)' })
+  @IsOptional()
+  @IsString()
+  dueDate?: string;
+
   @ApiPropertyOptional({ description: 'Client-generated unique ID for idempotency (offline sales)' })
   @IsOptional()
   @IsString()

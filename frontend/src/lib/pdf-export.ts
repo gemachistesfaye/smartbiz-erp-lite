@@ -29,6 +29,7 @@ interface InvoiceData {
   amountTendered?: number;
   changeAmount?: number;
   status: string;
+  dueDate?: string;
 }
 
 function addPdfHeader(doc: jsPDF, title: string, businessName?: string): void {
@@ -504,6 +505,12 @@ export function exportInvoiceToPDF(invoice: InvoiceData, businessName?: string):
     doc.text('Outstanding Balance:', labelX, y);
     doc.text(formatCurrency(invoice.totalAmount), rightX, y, { align: 'right' });
     y += 6;
+    if (invoice.dueDate) {
+      doc.setFont('helvetica', 'normal');
+      doc.text('Due Date:', labelX, y);
+      doc.text(new Date(invoice.dueDate).toLocaleDateString(), rightX, y, { align: 'right' });
+      y += 6;
+    }
   }
 
   if (invoice.amountTendered !== undefined) {

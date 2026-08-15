@@ -146,6 +146,12 @@ export function SaleDetailPage() {
                 <p className="text-sm text-muted-foreground">Payment Method</p>
                 <p className="font-medium">{sale.paymentMethod}</p>
               </div>
+              {sale.paymentMethod === 'CREDIT' && sale.dueDate && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Due Date</p>
+                  <p className="font-medium">{new Date(sale.dueDate).toLocaleDateString()}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

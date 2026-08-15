@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Search,
   FileDown,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,7 @@ export function PosPage() {
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
   const { data: productsData, isLoading: isLoadingProducts } = useProducts({
     search: searchQuery,
@@ -147,6 +149,7 @@ export function PosPage() {
     setDiscountAmount(0);
     setSelectedCustomer(null);
     setPaymentMethod('CASH');
+    setDueDate('');
   }, []);
 
   const handleCheckout = useCallback(() => {
@@ -164,6 +167,7 @@ export function PosPage() {
       totalAmount: number;
       items: { productId: string; quantity: number; unitPrice: number }[];
       customerId?: string;
+      dueDate?: string;
     } = {
       paymentMethod,
       subtotal: cartSubtotal,
@@ -179,6 +183,9 @@ export function PosPage() {
     if (paymentMethod === 'CREDIT' && selectedCustomer) {
       payload.customerId = selectedCustomer.id;
     }
+    if (paymentMethod === 'CREDIT' && dueDate) {
+      payload.dueDate = dueDate;
+    }
 
     createSale.mutate(payload, {
       onSuccess: (sale) => {
@@ -192,6 +199,7 @@ export function PosPage() {
     createSale,
     paymentMethod,
     selectedCustomer,
+    dueDate,
     cart,
     cartSubtotal,
     cartTotal,
@@ -520,10 +528,28 @@ export function PosPage() {
                       </div>
                     )}
 
+                    {paymentMethod === 'CREDIT' && (
+                      <div className="space-y-2">
+                        <label className="text-sm text-muted-foreground">
+                          <Calendar className="inline h-4 w-4 mr-1" />
+                          Due Date *
+                        </label>
+                        <Input
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                        />
+                        {!dueDate && paymentMethod === 'CREDIT' && (
+                          <p className="text-xs text-destructive">Due date is required for credit sales</p>
+                        )}
+                      </div>
+                    )}
+
                     <Button
                       className="w-full min-h-[48px]"
                       size="lg"
-                      disabled={cart.length === 0 || (paymentMethod === 'CREDIT' && !selectedCustomer)}
+                      disabled={cart.length === 0 || (paymentMethod === 'CREDIT' && (!selectedCustomer || !dueDate))}
                       onClick={handleCheckout}
                     >
                       <ShoppingCart className="mr-2 h-4 w-4" />
@@ -579,6 +605,12 @@ export function PosPage() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Customer</span>
                 <span>{getCustomerName(selectedCustomer)}</span>
+              </div>
+            )}
+            {paymentMethod === 'CREDIT' && dueDate && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Due Date</span>
+                <span>{new Date(dueDate).toLocaleDateString()}</span>
               </div>
             )}
           </div>

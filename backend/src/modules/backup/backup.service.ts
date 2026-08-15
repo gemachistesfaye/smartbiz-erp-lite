@@ -366,6 +366,7 @@ export class BackupService {
                 changeAmount: sale.changeAmount,
                 status: sale.status ?? 'COMPLETED',
                 notes: sale.notes,
+                dueDate: sale.dueDate ? new Date(sale.dueDate) : null,
                 clientId: sale.clientId,
                 createdAt: sale.createdAt ? new Date(sale.createdAt) : undefined,
               },

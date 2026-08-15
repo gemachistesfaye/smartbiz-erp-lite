@@ -211,6 +211,12 @@
     "phone": "ስልክ",
     "outstandingBalance": "Outstanding ቀንስ",
     "daysSinceLastCredit": "ከመጨረሻ ክሬዲት በኋላ ቀናት",
+    "dueDate": "የመክፈቻ ቀን",
+    "daysOverdue": "ከጊዜው በፊት የዘለቀ ቀን",
+    "status": "ሁኔታ",
+    "overdueBy": "በ{{days}} ቀን ከጊዜው በፊት",
+    "notYetDue": "ገና የለም",
+    "saleCount": "{{count}} የክሬዲት ሽያጭ(ች)",
     "action": "ተግባር",
     "sendReminder": "ማስጠንቀቂያ ላክ",
     "reminderSent": "ማስጠንቀቂያ ተልክቷል",
@@ -320,7 +326,9 @@
     "noSales": "ሽያጮች ገና የለም።",
     "voidSale": "ሽያጭ ሰርዝ",
     "saleDetails": "የሽያጭ ዝርዝሮች",
-    "searchPlaceholder": "ሽያጮችን ፈልግ..."
+    "searchPlaceholder": "ሽያጮችን ፈልግ...",
+    "dueDate": "የመክፈቻ ቀን",
+    "dueDateRequired": "ለክሬዲት ሽያጭ የመክፈቻ ቀን ያስፈልጋል"
   },
   "expenses": {
     "title": "ወጪዎች",
