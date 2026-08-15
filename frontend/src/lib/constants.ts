@@ -90,6 +90,10 @@ export const API_ENDPOINTS = {
     CUSTOMERS_CREDIT: '/reports/customers-credit',
     PROFITABILITY: '/reports/profitability',
   },
+  BACKUP: {
+    EXPORT: '/backup/export',
+    IMPORT: '/backup/import',
+  },
   HEALTH: '/health',
 } as const;
 
@@ -131,6 +135,7 @@ export const NAV_ITEMS = [
   { name: 'Suppliers', href: '/suppliers' },
   { name: 'Receive Stock', href: '/stock/receive' },
   { name: 'Customers', href: '/customers' },
+  { name: 'Overdue', href: '/customers/overdue' },
   { name: 'Sales', href: '/sales' },
   { name: 'Expenses', href: '/expenses' },
   { name: 'Reports', href: '/reports' },

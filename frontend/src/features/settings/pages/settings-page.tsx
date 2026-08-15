@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Building2, DollarSign, FileText } from 'lucide-react';
+import { Loader2, Building2, DollarSign, FileText, Globe, Download, Upload, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LanguageSelector } from '@/components/shared/language-selector';
+import { useExportBackup, useImportBackup, type ImportSummary } from '../hooks/use-backup';
 import {
   useSettings,
   useBusinessInfo,
@@ -60,6 +63,7 @@ function SettingsSkeleton() {
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation();
   const { data: settings, isLoading: settingsLoading } = useSettings();
   const { data: business, isLoading: businessLoading } = useBusinessInfo();
   const updateSettings = useUpdateSettings();
@@ -240,14 +244,170 @@ export function SettingsPage() {
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t('settings.saving')}
               </>
             ) : (
-              'Save Changes'
+              t('settings.saveChanges')
             )}
           </Button>
         </div>
       </form>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-base">{t('settings.language')}</CardTitle>
+              <CardDescription>{t('settings.languageDesc')}</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <LanguageSelector />
+        </CardContent>
+      </Card>
+
+      <BackupRestoreSection />
     </div>
+  );
+}
+
+function BackupRestoreSection() {
+  const { t } = useTranslation();
+  const exportBackup = useExportBackup();
+  const importBackup = useImportBackup();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+      toast.error(t('settings.invalidFile'));
+      return;
+    }
+
+    try {
+      const summary = await importBackup.mutateAsync(file);
+      setImportSummary(summary);
+      toast.success(t('settings.importComplete'));
+    } catch {
+      toast.error(t('settings.importFailed'));
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Download className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <CardTitle className="text-base">{t('settings.backupRestore')}</CardTitle>
+            <CardDescription>{t('settings.backupRestoreDesc')}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 border rounded-lg p-4 space-y-2">
+            <h4 className="font-medium flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              {t('settings.exportBackup')}
+            </h4>
+            <p className="text-sm text-muted-foreground">{t('settings.exportBackupDesc')}</p>
+            <Button
+              variant="outline"
+              onClick={() => exportBackup.mutate()}
+              disabled={exportBackup.isPending}
+              className="w-full sm:w-auto"
+            >
+              {exportBackup.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('settings.exporting')}
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  {t('settings.exportBackup')}
+                </>
+              )}
+            </Button>
+          </div>
+
+          <div className="flex-1 border rounded-lg p-4 space-y-2">
+            <h4 className="font-medium flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              {t('settings.importBackup')}
+            </h4>
+            <p className="text-sm text-muted-foreground">{t('settings.importBackupDesc')}</p>
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImport}
+              />
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importBackup.isPending}
+                className="w-full sm:w-auto"
+              >
+                {importBackup.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('settings.importing')}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {t('settings.selectFile')}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {importSummary && (
+          <div className="border rounded-lg p-4 space-y-2 bg-muted/30">
+            <h4 className="font-medium flex items-center gap-2 text-green-600">
+              <CheckCircle2 className="h-4 w-4" />
+              {t('settings.importSummary')}
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">Products: </span>
+                <span className="font-medium">{importSummary.products ?? 0}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Categories: </span>
+                <span className="font-medium">{importSummary.categories ?? 0}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Customers: </span>
+                <span className="font-medium">{importSummary.customers ?? 0}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Sales: </span>
+                <span className="font-medium">{importSummary.sales ?? 0}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Expenses: </span>
+                <span className="font-medium">{importSummary.expenses ?? 0}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

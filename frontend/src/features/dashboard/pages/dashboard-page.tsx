@@ -29,6 +29,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 function KpiSkeleton() {
   return (
@@ -81,6 +82,7 @@ function EmptyState({ message }: { message: string }) {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { data: currentUser } = useCurrentUser();
   const { data, isLoading, error } = useDashboard();
@@ -92,18 +94,18 @@ export function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Unable to load dashboard data.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('nav.dashboard')}</h1>
+          <p className="text-muted-foreground mt-1">{t('dashboard.unableToLoad')}</p>
         </div>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
-            <p className="text-lg font-semibold mb-2">Failed to load dashboard</p>
+            <p className="text-lg font-semibold mb-2">{t('dashboard.failedToLoad')}</p>
             <p className="text-sm text-muted-foreground mb-4">
-              Check your connection and try again.
+              {t('dashboard.checkConnection')}
             </p>
             <Button onClick={() => window.location.reload()} variant="outline">
-              Try Again
+              {t('common.retry')}
             </Button>
           </CardContent>
         </Card>
@@ -117,14 +119,14 @@ export function DashboardPage() {
     ? []
     : [
         {
-          title: "Today's Sales",
+          title: t('dashboard.todaysSales'),
           value: formatCurrency(overview?.todaySales || 0),
-          description: `${overview?.todaySaleCount || 0} transactions today`,
+          description: t('dashboard.transactionsToday', { count: overview?.todaySaleCount || 0 }),
           icon: ShoppingCart,
           trend: undefined as { value: number; isPositive: boolean } | undefined,
         },
         {
-          title: 'Monthly Revenue',
+          title: t('dashboard.monthlyRevenue'),
           value: formatCurrency(overview?.monthlyRevenue || 0),
           description: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
           icon: DollarSign,
@@ -133,34 +135,34 @@ export function DashboardPage() {
             : undefined,
         },
         {
-          title: 'Total Products',
+          title: t('dashboard.totalProducts'),
           value: String(overview?.totalProducts || 0),
-          description: 'Active products',
+          description: t('dashboard.activeProducts'),
           icon: Package,
           trend: undefined,
         },
         {
-          title: 'Low Stock Items',
+          title: t('dashboard.lowStockItems'),
           value: String(overview?.lowStockProducts || 0),
-          description: 'Need restocking',
+          description: t('dashboard.needRestocking'),
           icon: AlertTriangle,
           trend: overview?.lowStockProducts
             ? { value: overview.lowStockProducts, isPositive: false }
             : undefined,
         },
         {
-          title: 'Total Customers',
+          title: t('dashboard.totalCustomers'),
           value: String(overview?.totalCustomers || 0),
-          description: 'Registered customers',
+          description: t('dashboard.registeredCustomers'),
           icon: Users,
           trend: undefined,
         },
         {
-          title: 'Outstanding Credit',
+          title: t('dashboard.outstandingCredit'),
           value: formatCurrency(overview?.outstandingCredit || 0),
           description: data?.customerCreditSummary
-            ? `${data.customerCreditSummary.customerCount} customers`
-            : '0 customers',
+            ? t('dashboard.customersWithDebt', { count: data.customerCreditSummary.customerCount })
+            : t('dashboard.customersWithDebt', { count: 0 }),
           icon: CreditCard,
           trend: overview?.outstandingCredit ? { value: 0, isPositive: false } : undefined,
         },
@@ -198,9 +200,9 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Welcome back, {displayName}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('dashboard.welcome', { name: displayName })}</h1>
         <p className="text-muted-foreground mt-1">
-          Here's what's happening with your business today.
+          {t('dashboard.subtitle')}
         </p>
       </div>
 
@@ -220,21 +222,21 @@ export function DashboardPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+        <h2 className="text-lg font-semibold mb-3">{t('dashboard.quickActions')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <QuickActionCard label="New Sale" icon={Plus} onClick={() => navigate({ to: '/pos' })} />
+          <QuickActionCard label={t('dashboard.newSale')} icon={Plus} onClick={() => navigate({ to: '/pos' })} />
           <QuickActionCard
-            label="Add Product"
+            label={t('dashboard.addProduct')}
             icon={PackagePlus}
             onClick={() => navigate({ to: '/products' })}
           />
           <QuickActionCard
-            label="Add Customer"
+            label={t('dashboard.addCustomer')}
             icon={UserPlus}
             onClick={() => navigate({ to: '/customers' })}
           />
           <QuickActionCard
-            label="Generate Report"
+            label={t('dashboard.generateReport')}
             icon={FileBarChart}
             onClick={() => navigate({ to: '/reports' })}
           />
@@ -242,35 +244,35 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Sales Trend" description="Daily sales vs expenses this week">
+        <ChartCard title={t('dashboard.salesTrend')} description={t('dashboard.dailySalesVsExpenses')}>
           {isLoading ? <ChartSkeleton /> : <SalesTrendChart data={salesTrendData} />}
         </ChartCard>
 
-        <ChartCard title="Monthly Revenue" description="Revenue over recent months">
+        <ChartCard title={t('dashboard.monthlyRevenueChart')} description={t('dashboard.revenueOverMonths')}>
           {isLoading ? <ChartSkeleton /> : <RevenueChart data={monthlyRevenueData} />}
         </ChartCard>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Inventory Distribution" description="By category">
+        <ChartCard title={t('dashboard.inventoryDistribution')} description={t('dashboard.byCategory')}>
           {isLoading ? (
             <ChartSkeleton />
           ) : inventoryChartData.length === 0 ? (
-            <EmptyState message="No inventory data yet. Add products to see distribution." />
+            <EmptyState message={t('dashboard.noInventoryData')} />
           ) : (
             <InventoryDistributionChart data={inventoryChartData} />
           )}
         </ChartCard>
 
         <TableCard
-          title="Top Selling Products"
-          description="Best performers this month"
+          title={t('dashboard.topSellingProducts')}
+          description={t('dashboard.bestPerformers')}
           viewAllLink="/products"
         >
           {isLoading ? (
             <TableSkeleton />
           ) : !data?.topSellingProducts?.length ? (
-            <EmptyState message="No sales yet. Complete your first sale to see top products." />
+            <EmptyState message={t('dashboard.noSalesYet')} />
           ) : (
             <div className="space-y-3">
               {data.topSellingProducts.map((product, index) => (
@@ -292,11 +294,11 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <TableCard title="Recent Sales" description="Latest transactions" viewAllLink="/sales">
+        <TableCard title={t('dashboard.recentSales')} description={t('dashboard.latestTransactions')} viewAllLink="/sales">
           {isLoading ? (
             <TableSkeleton />
           ) : !data?.recentSales?.length ? (
-            <EmptyState message="No sales yet. Start by creating your first sale." />
+            <EmptyState message={t('dashboard.noRecentSales')} />
           ) : (
             <div className="space-y-3">
               {data.recentSales.map((sale) => (
@@ -324,11 +326,11 @@ export function DashboardPage() {
           )}
         </TableCard>
 
-        <TableCard title="Recent Activity" description="Latest actions in your store">
+        <TableCard title={t('dashboard.recentActivity')} description={t('dashboard.latestActions')}>
           {isLoading ? (
             <TableSkeleton />
           ) : !data?.activityFeed?.length ? (
-            <EmptyState message="No recent activity. Start using the system to see activity here." />
+            <EmptyState message={t('dashboard.noRecentActivity')} />
           ) : (
             <ActivityCard activities={data.activityFeed} />
           )}

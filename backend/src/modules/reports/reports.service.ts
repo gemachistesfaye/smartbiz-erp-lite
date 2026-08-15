@@ -902,4 +902,47 @@ export class ReportsService {
     const days = Math.floor(hours / 24);
     return `${days} day${days > 1 ? 's' : ''} ago`;
   }
+
+  async getEqubRecommendation(
+    businessId: string,
+    percentage: number = 20,
+    days: number = 30,
+  ) {
+    const now = new Date();
+    const periodStart = new Date(now.getTime() - days * 86400000);
+    const periodEnd = now;
+
+    const [salesResult, expensesResult] = await Promise.all([
+      this.prisma.sale.aggregate({
+        where: {
+          businessId,
+          status: 'COMPLETED',
+          createdAt: { gte: periodStart, lt: periodEnd },
+        },
+        _sum: { totalAmount: true },
+      }),
+      this.prisma.expense.aggregate({
+        where: {
+          businessId,
+          createdAt: { gte: periodStart, lt: periodEnd },
+        },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const totalRevenue = Number(salesResult._sum.totalAmount || 0);
+    const totalExpenses = Number(expensesResult._sum.amount || 0);
+    const netProfit = totalRevenue - totalExpenses;
+    const averageDailyProfit = netProfit / days;
+    const recommendedContribution = averageDailyProfit * (percentage / 100);
+
+    return {
+      averageDailyProfit: Math.round(averageDailyProfit * 100) / 100,
+      recommendedContribution: Math.round(recommendedContribution * 100) / 100,
+      percentageUsed: percentage,
+      periodDays: days,
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+    };
+  }
 }

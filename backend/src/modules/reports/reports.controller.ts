@@ -7,6 +7,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ReportsService } from './reports.service';
 import { ReportFilterDto } from './dto/report-filter.dto';
 import { DashboardQueryDto } from './dto/dashboard-query.dto';
+import { EqubRecommendationQueryDto } from './dto/equb-recommendation.dto';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -77,5 +78,19 @@ export class ReportsController {
     @Query() query: ReportFilterDto,
   ) {
     return this.reportsService.getProfitability(user.businessId, query);
+  }
+
+  @Get('equb-recommendation')
+  @Roles('OWNER', 'MANAGER')
+  @ApiOperation({ summary: 'Get equb contribution recommendation based on profit' })
+  async getEqubRecommendation(
+    @CurrentUser() user: { businessId: string },
+    @Query() query: EqubRecommendationQueryDto,
+  ) {
+    return this.reportsService.getEqubRecommendation(
+      user.businessId,
+      query.percentage,
+      query.days,
+    );
   }
 }

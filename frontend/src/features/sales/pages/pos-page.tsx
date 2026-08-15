@@ -13,6 +13,7 @@ import {
   User,
   ArrowLeft,
   Search,
+  FileDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,7 @@ import { useActiveCustomers } from '@/features/customers/hooks/use-customers';
 import { useCreateSale } from '@/features/sales/hooks/use-sales';
 import { formatCurrency } from '@/lib/utils';
 import { Receipt } from '@/components/shared/receipt';
+import { Invoice } from '@/components/shared/invoice';
 import type { Product, Customer, Sale } from '@/types/models';
 
 interface CartItem {
@@ -51,6 +53,7 @@ export function PosPage() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
@@ -601,6 +604,19 @@ export function PosPage() {
           {completedSale && (
             <Receipt sale={completedSale} />
           )}
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setShowSuccessDialog(false);
+                setShowInvoiceDialog(true);
+              }}
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Invoice
+            </Button>
+          </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowSuccessDialog(false)}>
               New Sale
@@ -608,6 +624,20 @@ export function PosPage() {
             <Link to="/sales" className="w-full sm:w-auto">
               <Button className="w-full">View Sales</Button>
             </Link>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Invoice</DialogTitle>
+          </DialogHeader>
+          {completedSale && (
+            <Invoice sale={completedSale} />
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

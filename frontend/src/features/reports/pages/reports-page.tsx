@@ -12,11 +12,13 @@ import {
   CreditCard,
   BarChart,
   PieChart,
+  Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -24,6 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import {
   AreaChart,
@@ -49,6 +57,18 @@ import {
   useProfitability,
   type ReportFilters,
 } from '../hooks/use-reports';
+import {
+  exportSalesReportToPDF,
+  exportInventoryReportToPDF,
+  exportCustomerCreditReportToPDF,
+  exportExpenseReportToPDF,
+} from '@/lib/pdf-export';
+import {
+  exportSalesToCSV,
+  exportInventoryToCSV,
+  exportCustomerCreditToCSV,
+  exportExpensesToCSV,
+} from '@/lib/csv-export';
 
 const RANGE_OPTIONS = [
   { value: 'today', label: 'Today' },
@@ -134,6 +154,31 @@ function EmptyState({ icon: Icon, message }: { icon: React.ElementType; message:
       <Icon className="h-10 w-10 text-muted-foreground mb-3" />
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
+  );
+}
+
+function ExportMenu({
+  onExportPDF,
+  onExportCSV,
+  label = 'Export',
+}: {
+  onExportPDF: () => void;
+  onExportCSV: () => void;
+  label?: string;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          {label}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onExportPDF}>Export as PDF</DropdownMenuItem>
+        <DropdownMenuItem onClick={onExportCSV}>Export as CSV</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -240,6 +285,26 @@ function OverviewTab({ filters }: { filters: ReportFilters }) {
 function SalesTab({ filters }: { filters: ReportFilters }) {
   const { data, isLoading, error } = useSalesReport(filters);
 
+  const handleExportPDF = () => {
+    if (data) exportSalesReportToPDF(data, filters);
+  };
+
+  const handleExportCSV = () => {
+    if (!data) return;
+    const rows = data.topProducts.map((p) => ({
+      saleNumber: '',
+      createdAt: '',
+      customer: p.name,
+      paymentMethod: '',
+      subtotal: 0,
+      discountAmount: 0,
+      totalAmount: p.revenue,
+      status: '',
+      items: [{ productName: p.name, quantity: p.quantitySold, unitPrice: p.revenue / (p.quantitySold || 1), totalPrice: p.revenue }],
+    }));
+    exportSalesToCSV(rows);
+  };
+
   if (error) {
     return (
       <Card>
@@ -274,6 +339,11 @@ function SalesTab({ filters }: { filters: ReportFilters }) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Sales Report</h2>
+        <ExportMenu onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard title="Total Revenue" value={formatCurrency(data.summary.totalRevenue)} icon={DollarSign} />
         <StatCard title="Transactions" value={String(data.summary.totalSales)} icon={ShoppingCart} />
@@ -410,6 +480,26 @@ function SalesTab({ filters }: { filters: ReportFilters }) {
 function InventoryTab() {
   const { data, isLoading, error } = useInventoryReport();
 
+  const handleExportPDF = () => {
+    if (data) exportInventoryReportToPDF(data);
+  };
+
+  const handleExportCSV = () => {
+    if (!data) return;
+    exportInventoryToCSV(
+      data.products.map((p) => ({
+        name: p.name,
+        sku: p.sku || undefined,
+        category: p.category,
+        currentStock: p.currentStock,
+        minimumStock: p.minimumStock,
+        unitCost: p.unitCost,
+        inventoryValue: p.inventoryValue,
+        status: p.status === 'out_of_stock' ? 'Out of Stock' : p.status === 'low_stock' ? 'Low Stock' : 'In Stock',
+      })),
+    );
+  };
+
   if (error) {
     return (
       <Card>
@@ -440,6 +530,11 @@ function InventoryTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Inventory Report</h2>
+        <ExportMenu onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Products" value={String(data.summary.totalProducts)} icon={Package} />
         <StatCard title="Total Stock" value={formatNumber(data.summary.totalStockQuantity)} icon={BarChart3} />
@@ -506,6 +601,24 @@ function InventoryTab() {
 function CreditTab() {
   const { data, isLoading, error } = useCustomerCreditReport();
 
+  const handleExportPDF = () => {
+    if (data) exportCustomerCreditReportToPDF(data);
+  };
+
+  const handleExportCSV = () => {
+    if (!data) return;
+    exportCustomerCreditToCSV(
+      data.customers.map((c) => ({
+        name: c.name,
+        phone: c.phone || undefined,
+        creditLimit: c.creditLimit,
+        outstanding: c.outstanding,
+        availableCredit: c.availableCredit,
+        status: c.status === 'exceeded_limit' ? 'Exceeded' : c.status === 'approaching_limit' ? 'Near Limit' : 'Healthy',
+      })),
+    );
+  };
+
   if (error) {
     return (
       <Card>
@@ -536,6 +649,11 @@ function CreditTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Customer Credit Report</h2>
+        <ExportMenu onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Outstanding Credit" value={formatCurrency(data.summary.totalOutstanding)} icon={CreditCard} />
         <StatCard title="Customers with Credit" value={String(data.summary.customerCount)} icon={Users} />
@@ -598,6 +716,23 @@ function ExpensesTab({ filters }: { filters: ReportFilters }) {
   const { data, isLoading, error } = useExpenseReport(filters);
   const { data: profitability } = useProfitability(filters);
 
+  const handleExportPDF = () => {
+    if (data) exportExpenseReportToPDF(data, profitability || undefined);
+  };
+
+  const handleExportCSV = () => {
+    if (!data) return;
+    exportExpensesToCSV(
+      data.byCategory.map((c) => ({
+        description: c.name,
+        amount: c.totalAmount,
+        date: new Date().toISOString(),
+        category: c.name,
+        paymentMethod: 'N/A',
+      })),
+    );
+  };
+
   if (error) {
     return (
       <Card>
@@ -629,6 +764,15 @@ function ExpensesTab({ filters }: { filters: ReportFilters }) {
   if (!data.available) {
     return (
       <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Expense Report</h2>
+          {profitability && (
+            <ExportMenu
+              onExportPDF={handleExportPDF}
+              onExportCSV={handleExportCSV}
+            />
+          )}
+        </div>
         <Card>
           <CardContent className="p-6">
             <EmptyState icon={Receipt} message="Expense tracking is not available yet. Create expense categories to enable expense reporting." />
@@ -657,6 +801,11 @@ function ExpensesTab({ filters }: { filters: ReportFilters }) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Expense Report</h2>
+        <ExportMenu onExportPDF={handleExportPDF} onExportCSV={handleExportCSV} />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Expenses" value={formatCurrency(data.summary.totalExpenses)} icon={Receipt} />
         <StatCard title="Expense Count" value={String(data.summary.expenseCount)} icon={BarChart3} />

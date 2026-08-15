@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, Link } from '@tanstack/react-router';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useSale, useCancelSale } from '../hooks/use-sales';
 import { useCurrentUser } from '@/features/auth/hooks/use-auth';
+import { Invoice } from '@/components/shared/invoice';
 import { formatCurrency } from '@/lib/utils';
 
 export function SaleDetailPage() {
@@ -25,6 +27,7 @@ export function SaleDetailPage() {
   const { data: currentUser } = useCurrentUser();
   const cancelSale = useCancelSale();
   const [open, setOpen] = useState(false);
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
 
   if (isLoading) {
     return (
@@ -87,27 +90,33 @@ export function SaleDetailPage() {
             <div className="mt-1">{getStatusBadge()}</div>
           </div>
         </div>
-        {canCancel && (
-          <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">Cancel Sale</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will void sale {sale.saleNumber}. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Go Back</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancel} disabled={cancelSale.isPending}>
-                  {cancelSale.isPending ? 'Cancelling...' : 'Yes, Cancel Sale'}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowInvoiceDialog(true)}>
+            <FileDown className="mr-2 h-4 w-4" />
+            Invoice
+          </Button>
+          {canCancel && (
+            <AlertDialog open={open} onOpenChange={setOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Cancel Sale</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will void sale {sale.saleNumber}. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Go Back</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleCancel} disabled={cancelSale.isPending}>
+                    {cancelSale.isPending ? 'Cancelling...' : 'Yes, Cancel Sale'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -214,6 +223,18 @@ export function SaleDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Invoice - {sale.saleNumber}</DialogTitle>
+          </DialogHeader>
+          <Invoice sale={sale} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

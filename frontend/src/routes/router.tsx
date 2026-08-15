@@ -151,6 +151,13 @@ const ProfilePage = withSuspense(
     import('@/features/profile/pages/profile-page').then((m) => ({ default: m.ProfilePage })),
   ),
 );
+const OverdueCustomersPage = withSuspense(
+  lazy(() =>
+    import('@/features/customers/pages/overdue-customers-page').then((m) => ({
+      default: m.OverdueCustomersPage,
+    })),
+  ),
+);
 const HelpPage = withSuspense(
   lazy(() => import('@/features/help/pages/help-page').then((m) => ({ default: m.HelpPage }))),
 );
@@ -308,6 +315,12 @@ const customerDetailRoute = createRoute({
   component: CustomerDetailPage,
 });
 
+const overdueCustomersRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: '/customers/overdue',
+  component: OverdueCustomersPage,
+});
+
 const salesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: '/sales',
@@ -395,6 +408,7 @@ const routeTree = rootRoute.addChildren([
     adjustStockRoute,
     customersRoute,
     customerDetailRoute,
+    overdueCustomersRoute,
     salesRoute,
     saleDetailRoute,
     posRoute,
